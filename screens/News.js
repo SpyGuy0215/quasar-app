@@ -1,18 +1,18 @@
+// screens/News.js
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import NewsCard from "../components/NewsCard";
 import * as WebBrowser from "expo-web-browser";
-import "../global.css"; // Tailwind classes, if still used
+import { useTheme } from "../ThemeContext";
+import "../global.css";
 
 const API_URL = "https://api.spaceflightnewsapi.net/v4/articles";
 
 async function callNewsAPI(offset = 0) {
     try {
         const response = await fetch(`${API_URL}?offset=${offset}`);
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
+        if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
         return data.results.map((article) => ({
             title: article.title,
@@ -36,9 +36,9 @@ async function openWebBrowser(url) {
 }
 
 export default function NewsScreen() {
+    const { isDarkMode } = useTheme();
     const [newsData, setNewsData] = useState([]);
     const [newsDataOffset, setNewsDataOffset] = useState(0);
-    const [newsFeedRefreshing, setNewsFeedRefreshing] = useState(false);
 
     useEffect(() => {
         fetchNewsData();
@@ -55,9 +55,12 @@ export default function NewsScreen() {
         }
     }
 
+    const backgroundColor = isDarkMode ? "#000" : "#f3f4f6";
+    const textColor = isDarkMode ? "#fff" : "#000";
+
     return newsData.length > 0 ? (
         <FlatList
-            className="bg-gray-100"
+            style={{ backgroundColor }}
             contentContainerStyle={{ paddingBottom: 24 }}
             data={newsData}
             keyExtractor={(item, index) => index.toString()}
@@ -80,8 +83,8 @@ export default function NewsScreen() {
             showsVerticalScrollIndicator={false}
         />
     ) : (
-        <View className="flex-1 items-center justify-center bg-white">
-            <Text className="text-black text-lg">Loading space news...</Text>
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor }}>
+            <Text style={{ color: textColor, fontSize: 18 }}>Loading space news...</Text>
         </View>
     );
 }

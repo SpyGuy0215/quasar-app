@@ -1,7 +1,7 @@
+// App.js
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import { View, useColorScheme, TouchableOpacity } from "react-native";
-import "./global.css";
+import React from "react";
+import { TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -10,14 +10,13 @@ import ImagesScreen from "./screens/Images";
 import ExoplanetsScreen from "./screens/Exoplanets";
 import AIScreen from "./screens/AI";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import "./global.css";
+import { ThemeProvider, useTheme } from "./ThemeContext";
 
 const Drawer = createDrawerNavigator();
 
-export default function App() {
-    const systemColorScheme = useColorScheme();
-    const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === "dark");
-
-    const toggleTheme = () => setIsDarkMode(!isDarkMode);
+function AppContent() {
+    const { isDarkMode, toggleTheme } = useTheme();
 
     const drawerStyles = {
         drawerStyle: {
@@ -86,5 +85,13 @@ export default function App() {
                 </Drawer.Navigator>
             </NavigationContainer>
         </GestureHandlerRootView>
+    );
+}
+
+export default function App() {
+    return (
+        <ThemeProvider>
+            <AppContent />
+        </ThemeProvider>
     );
 }

@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, useColorScheme } from "react-native";
+// AI.js
+import React, { useCallback, useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import "../global.css";
 import SupernovaAI from "../assets/supernova-ai-pfp.avif";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTheme } from "../ThemeContext"; // Import useTheme
 
-export default function AI({ isDarkMode }) {
+export default function AI() {
+    const { isDarkMode } = useTheme(); // Get dark mode value from context
+
     const defaultBotMessage = {
         _id: 1,
         text: "Hello! How may I answer your questions about space?",
@@ -26,7 +30,6 @@ export default function AI({ isDarkMode }) {
     const [messages, setMessages] = useState([defaultBotMessage]);
     const [formattedMsgs, setFormattedMsgs] = useState([defaultSystemMessage]);
 
-    // Reset chat to default messages
     const resetChat = () => {
         setMessages([defaultBotMessage]);
         setFormattedMsgs([defaultSystemMessage]);
@@ -102,7 +105,7 @@ export default function AI({ isDarkMode }) {
                 flex: 1,
                 paddingBottom: 20,
                 paddingHorizontal: 10,
-                backgroundColor: isDarkMode ? "#000" : "#fff", // Set background to black in dark mode
+                backgroundColor: isDarkMode ? "#000" : "#fff",
             }}
         >
             <TouchableOpacity
@@ -134,14 +137,14 @@ export default function AI({ isDarkMode }) {
                 renderUsernameOnMessage
                 placeholder="Type a message about the cosmos..."
                 textInputStyle={{
-                    backgroundColor: isDarkMode ? "#000" : "#fff", // Fully black in dark mode
+                    backgroundColor: isDarkMode ? "#000" : "#fff",
                     borderRadius: 20,
                     paddingHorizontal: 10,
                     paddingVertical: 5,
                     fontSize: 16,
-                    color: isDarkMode ? "#fff" : "#000", // Text color adapts to mode
-                    borderWidth: 1, // Add a border
-                    borderColor: isDarkMode ? "#555" : "#ccc", // Border color adapts to mode
+                    color: isDarkMode ? "#fff" : "#000",
+                    borderWidth: 1,
+                    borderColor: isDarkMode ? "#555" : "#ccc",
                 }}
                 renderBubble={(props) => {
                     const isUser = props.currentMessage.user._id === 1;
@@ -165,9 +168,7 @@ export default function AI({ isDarkMode }) {
                             <Text
                                 style={{
                                     color: isUser
-                                        ? isDarkMode
-                                            ? "#fff"
-                                            : "#fff"
+                                        ? "#fff"
                                         : isDarkMode
                                         ? "#fff"
                                         : "#000",

@@ -14,6 +14,7 @@ import {
 import { SceneMap, TabView, TabBar } from "react-native-tab-view";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import { useTheme } from "../ThemeContext";
 
 const API_KEY = "B1yWxg9mEnZ6PIpWwDiJ8EWUSAkyj4V6re9N3Y6l";
 
@@ -47,21 +48,39 @@ async function getNASAIVL() {
 const windowWidth = Dimensions.get("window").width;
 const windowHeight = Dimensions.get("window").height;
 
-const APODTab = ({ loading, apodData, onImagePress }) => {
+const APODTab = ({ loading, apodData, onImagePress, isDarkMode }) => {
+  const backgroundColor = isDarkMode ? "#000" : "#fff";
+  const textColor = isDarkMode ? "#fff" : "#000";
+
   return (
-    <View className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor }}>
       {loading ? (
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="small" color="#000" />
-          <Text className="mt-2 text-lg text-black font-semibold">
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="small" color={textColor} />
+          <Text
+            style={{
+              marginTop: 8,
+              fontSize: 18,
+              fontWeight: "600",
+              color: textColor,
+            }}
+          >
             Loading Astronomy Picture...
           </Text>
         </View>
       ) : (
-        <ScrollView className="flex">
+        <ScrollView style={{ flex: 1 }}>
           {apodData && (
-            <View className="p-4">
-              <Text className="text-2xl font-bold text-center mb-4 text-black">
+            <View style={{ padding: 16 }}>
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginBottom: 16,
+                  color: textColor,
+                }}
+              >
                 {apodData.title}
               </Text>
               <TouchableOpacity
@@ -69,12 +88,17 @@ const APODTab = ({ loading, apodData, onImagePress }) => {
                 onPress={() => onImagePress(apodData.hdurl)}
               >
                 <Image
-                  className="w-full h-72 rounded-2xl mb-4"
+                  style={{
+                    width: "100%",
+                    height: 288,
+                    borderRadius: 20,
+                    marginBottom: 16,
+                  }}
                   source={{ uri: apodData.hdurl }}
                   resizeMode="contain"
                 />
               </TouchableOpacity>
-              <Text className="text-lg text-black leading-6">
+              <Text style={{ fontSize: 16, lineHeight: 24, color: textColor }}>
                 {apodData.explanation}
               </Text>
             </View>
@@ -86,7 +110,6 @@ const APODTab = ({ loading, apodData, onImagePress }) => {
 };
 
 async function downloadImage(imageUrl) {
-  // Request media library permissions
   const { status } = await MediaLibrary.requestPermissionsAsync();
   if (status !== "granted") {
     Alert.alert(
@@ -97,12 +120,10 @@ async function downloadImage(imageUrl) {
   }
 
   try {
-    // Download the image to a temporary file
     const fileName = imageUrl.split("/").pop();
     const fileUri = `${FileSystem.documentDirectory}${fileName}`;
     const downloadResult = await FileSystem.downloadAsync(imageUrl, fileUri);
 
-    // Save the file to the user's media library
     await MediaLibrary.createAssetAsync(downloadResult.uri);
     Alert.alert("Download Complete", "Image has been saved to your photos.");
   } catch (error) {
@@ -111,9 +132,11 @@ async function downloadImage(imageUrl) {
   }
 }
 
-const NASAIVLTab = ({ nasaIVLData, onImagePress }) => {
+const NASAIVLTab = ({ nasaIVLData, onImagePress, isDarkMode }) => {
+  const backgroundColor = isDarkMode ? "#000" : "#fff";
+
   return (
-    <View className="flex-1 bg-white">
+    <View style={{ flex: 1, backgroundColor }}>
       <FlatList
         data={nasaIVLData}
         keyExtractor={(item, index) => index.toString()}
@@ -121,7 +144,6 @@ const NASAIVLTab = ({ nasaIVLData, onImagePress }) => {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => onImagePress(item)}
-            className="mb-4"
             style={{ flex: 1 / 2, margin: 4 }}
           >
             <Image
@@ -151,6 +173,8 @@ export default function ImagesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalImageUri, setModalImageUri] = useState(null);
 
+  const { isDarkMode } = useTheme();
+
   useEffect(() => {
     getAPOD().then((data) => {
       if (data) setApodData(data);
@@ -165,22 +189,24 @@ export default function ImagesScreen() {
 
   const onImagePress = (uri) => {
     Alert.alert(
-        "Download Image",
-        "Do you want to save this image to your photos?",
-        [
-            { text: "Cancel", style: "cancel" },
-            {
-                text: "Download",
-                onPress: () => downloadImage(uri),
-            },
-        ]
+      "Download Image",
+      "Do you want to save this image to your photos?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Download",
+          onPress: () => downloadImage(uri),
+        },
+      ]
     );
-};
+  };
 
   if (!apodData && nasaIVLData.length === 0) {
     return (
-      <View className="flex-1 justify-center items-center bg-white">
-        <Text className="text-lg text-black">Loading...</Text>
+      <View
+        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: isDarkMode ? "#000" : "#fff" }}
+      >
+        <Text style={{ fontSize: 18, color: isDarkMode ? "#fff" : "#000" }}>Loading...</Text>
       </View>
     );
   }
@@ -188,13 +214,13 @@ export default function ImagesScreen() {
   const renderTabBar = (props) => (
     <TabBar
       {...props}
-      indicatorStyle={{ backgroundColor: "white", height: 3 }} // underline
-      style={{ backgroundColor: "#000" }} // tab bar bg
+      indicatorStyle={{ backgroundColor: "white", height: 3 }}
+      style={{ backgroundColor: "#000" }}
       labelStyle={{
         color: "white",
         fontWeight: "bold",
         textTransform: "none",
-      }} // tab text
+      }}
       activeColor="#fff"
       inactiveColor="#888"
     />
@@ -206,17 +232,10 @@ export default function ImagesScreen() {
         navigationState={{ index, routes }}
         renderScene={SceneMap({
           first: () => (
-            <APODTab
-              loading={loading}
-              apodData={apodData}
-              onImagePress={onImagePress} // Pass onImagePress here
-            />
+            <APODTab loading={loading} apodData={apodData} onImagePress={onImagePress} isDarkMode={isDarkMode} />
           ),
           second: () => (
-            <NASAIVLTab
-              nasaIVLData={nasaIVLData}
-              onImagePress={onImagePress} // Pass onImagePress here
-            />
+            <NASAIVLTab nasaIVLData={nasaIVLData} onImagePress={onImagePress} isDarkMode={isDarkMode} />
           ),
         })}
         onIndexChange={setIndex}
@@ -230,9 +249,14 @@ export default function ImagesScreen() {
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableOpacity
-          className="flex-1 bg-black bg-opacity-90 justify-center items-center"
           activeOpacity={1}
           onPress={() => setModalVisible(false)}
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.9)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
         >
           <Image
             source={{ uri: modalImageUri }}
@@ -243,7 +267,14 @@ export default function ImagesScreen() {
             }}
             resizeMode="contain"
           />
-          <Text className="text-white mt-4 text-lg font-semibold">
+          <Text
+            style={{
+              color: "#fff",
+              marginTop: 16,
+              fontSize: 18,
+              fontWeight: "600",
+            }}
+          >
             Tap anywhere to close
           </Text>
         </TouchableOpacity>

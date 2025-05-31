@@ -1,11 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ActivityIndicator, FlatList, TextInput, TouchableOpacity, ScrollView } from "react-native";
+import {
+    View,
+    Text,
+    ActivityIndicator,
+    FlatList,
+    TextInput,
+    TouchableOpacity,
+    ScrollView
+} from "react-native";
 import * as FileSystem from "expo-file-system";
+import { useTheme } from "../ThemeContext";
 
 const BASE_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync";
 const DEFAULT_QUERY = "?query=select+distinct(pl_name)+pl_name,discoverymethod,pl_masse,pl_orbper+from+ps+order+by+pl_name+asc&format=json";
 
 export default function ExoplanetsScreen() {
+    const { isDarkMode } = useTheme();
+
     const [exoplanetsData, setExoplanetsData] = useState([]);
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -62,33 +73,46 @@ export default function ExoplanetsScreen() {
         }
     };
 
+    const backgroundColor = isDarkMode ? "#000" : "#fff";
+    const textColor = isDarkMode ? "#fff" : "#000";
+    const inputBackground = isDarkMode ? "#1a1a1a" : "#fff";
+    const borderColor = isDarkMode ? "#333" : "#ccc";
+
     if (loading) {
         return (
-            <View className="flex-1 justify-center items-center bg-white">
-                <ActivityIndicator size="large" color="#000" />
-                <Text className="mt-4 text-lg text-black">Loading Exoplanets...</Text>
+            <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor }}>
+                <ActivityIndicator size="large" color={textColor} />
+                <Text style={{ marginTop: 16, fontSize: 18, color: textColor }}>Loading Exoplanets...</Text>
             </View>
         );
     }
 
     if (selectedPlanet) {
-
         return (
-            <View className="flex-1 bg-white p-4">
+            <View style={{ flex: 1, backgroundColor, padding: 16 }}>
                 <TouchableOpacity
-                    className="mb-4 px-4 py-2 bg-gray-200 rounded-full w-24"
+                    style={{
+                        marginBottom: 16,
+                        paddingHorizontal: 16,
+                        paddingVertical: 8,
+                        backgroundColor: isDarkMode ? "#333" : "#e5e5e5",
+                        borderRadius: 999,
+                        width: 100,
+                    }}
                     onPress={() => setSelectedPlanet(null)}
                 >
-                    <Text className="text-black text-center font-semibold">Back</Text>
+                    <Text style={{ color: textColor, textAlign: "center", fontWeight: "600" }}>Back</Text>
                 </TouchableOpacity>
                 <ScrollView>
-                    <Text className="text-3xl font-bold text-black mb-4">
+                    <Text style={{ fontSize: 28, fontWeight: "bold", color: textColor, marginBottom: 16 }}>
                         {selectedPlanet.kepler_name || selectedPlanet.pl_name || "Unknown Exoplanet"}
                     </Text>
                     {Object.entries(selectedPlanet).map(([key, value]) => (
-                        <View key={key} className="mb-3">
-                            <Text className="font-semibold text-black capitalize">{key.replace(/_/g, " ")}:</Text>
-                            <Text className="text-black">{value !== null ? value.toString() : "Unknown"}</Text>
+                        <View key={key} style={{ marginBottom: 12 }}>
+                            <Text style={{ fontWeight: "600", color: textColor, textTransform: "capitalize" }}>
+                                {key.replace(/_/g, " ")}:
+                            </Text>
+                            <Text style={{ color: textColor }}>{value !== null ? value.toString() : "Unknown"}</Text>
                         </View>
                     ))}
                 </ScrollView>
@@ -97,12 +121,22 @@ export default function ExoplanetsScreen() {
     }
 
     return (
-        <View className="flex-1 bg-white p-4">
-            <Text className="text-2xl font-bold text-black mb-4">Named Exoplanets</Text>
+        <View style={{ flex: 1, backgroundColor, padding: 16 }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", color: textColor, marginBottom: 16 }}>
+                Named Exoplanets
+            </Text>
             <TextInput
-                className="bg-white text-black p-2 rounded-lg border border-gray-300 mb-4"
+                style={{
+                    backgroundColor: inputBackground,
+                    color: textColor,
+                    padding: 12,
+                    borderRadius: 8,
+                    borderWidth: 1,
+                    borderColor,
+                    marginBottom: 16,
+                }}
                 placeholder="Search by exoplanet name..."
-                placeholderTextColor="#999"
+                placeholderTextColor={isDarkMode ? "#aaa" : "#999"}
                 value={searchQuery}
                 onChangeText={handleSearch}
             />
@@ -111,16 +145,23 @@ export default function ExoplanetsScreen() {
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({ item }) => (
                     <TouchableOpacity
-                        className="mb-4 p-4 bg-white rounded-xl border border-gray-400"
+                        style={{
+                            marginBottom: 16,
+                            padding: 16,
+                            backgroundColor: inputBackground,
+                            borderRadius: 16,
+                            borderWidth: 1,
+                            borderColor: isDarkMode ? "#444" : "#ccc",
+                        }}
                         onPress={() => setSelectedPlanet(item)}
                     >
-                        <Text className="text-xl font-bold text-black">
+                        <Text style={{ fontSize: 18, fontWeight: "bold", color: textColor }}>
                             {item.kepler_name || item.pl_name || "Unknown Exoplanet"}
                         </Text>
-                        <Text className="text-sm text-black mt-2">
+                        <Text style={{ fontSize: 14, color: textColor, marginTop: 8 }}>
                             Discovery Method: {item.discoverymethod || "Unknown"}
                         </Text>
-                        <Text className="text-sm text-black mt-2">
+                        <Text style={{ fontSize: 14, color: textColor, marginTop: 8 }}>
                             Orbital Period: {item.pl_orbper ? `${item.pl_orbper} days` : "Unknown"}
                         </Text>
                     </TouchableOpacity>
