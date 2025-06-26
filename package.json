@@ -1,5 +1,5 @@
 {
-  "name": "montyhacks-viii",
+  "name": "quasar",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -31,10 +31,14 @@
     "react-native-tab-view": "^4.1.1",
     "tailwindcss": "^3.4.17",
     "expo-file-system": "~18.1.10",
-    "expo-media-library": "~17.1.6"
+    "expo-media-library": "~17.1.6",
+    "expo-navigation-bar": "~4.2.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
+  },
+  "android": {
+    "package": "com.shashankprasanna.quasar"
   },
   "private": true
 }

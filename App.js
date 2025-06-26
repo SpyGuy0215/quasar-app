@@ -1,5 +1,6 @@
 // App.js
 import { StatusBar } from "expo-status-bar";
+import * as NavigationBar from "expo-navigation-bar";
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
@@ -44,6 +45,7 @@ function AppContent() {
 
     return (
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: isDarkMode ? "#000" : "#fff" }}>
+            <StatusBar style={isDarkMode ? "light" : "dark"}/>
             <NavigationContainer>
                 <Drawer.Navigator initialRouteName="News" screenOptions={drawerStyles}>
                     <Drawer.Screen
@@ -74,7 +76,7 @@ function AppContent() {
                         }}
                     />
                     <Drawer.Screen
-                        name="Supernova AI"
+                        name="Quasar AI"
                         component={AIScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (

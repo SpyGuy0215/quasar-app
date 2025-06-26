@@ -3,7 +3,7 @@ import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import "../global.css";
-import SupernovaAI from "../assets/supernova-ai-pfp.avif";
+import QuasarAI from "../assets/quasar-ai-pfp.avif";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../ThemeContext"; // Import useTheme
 
@@ -16,15 +16,15 @@ export default function AI() {
         createdAt: new Date(),
         user: {
             _id: 2,
-            name: "Supernova AI",
-            avatar: SupernovaAI,
+            name: "Quasar AI",
+            avatar: QuasarAI,
         },
     };
 
     const defaultSystemMessage = {
         role: "system",
         content:
-            "You are a helpful assistant that answers questions about space. You are part of a mobile app called Supernova. You are friendly, concise, and informative. You just said 'how may I answer your questions about space?' Generally, only respond to the last statement or question from the user. Don't use previous context unless you need to, because the way the data is formatted for you, you oftentimes don't see that you have already responded.",
+            "You are a helpful assistant that answers questions about space. You are part of a mobile app called Quasar. You are friendly, concise, and informative. You just said 'how may I answer your questions about space?' Generally, only respond to the last statement or question from the user. Don't use previous context unless you need to, because the way the data is formatted for you, you oftentimes don't see that you have already responded.",
     };
 
     const [messages, setMessages] = useState([defaultBotMessage]);
@@ -79,8 +79,8 @@ export default function AI() {
                 createdAt: new Date(),
                 user: {
                     _id: 2,
-                    name: "Supernova AI",
-                    avatar: SupernovaAI,
+                    name: "Quasar AI",
+                    avatar: QuasarAI,
                 },
             };
             setMessages((previousMessages) =>
@@ -103,7 +103,7 @@ export default function AI() {
         <View
             style={{
                 flex: 1,
-                paddingBottom: 20,
+                paddingBottom: 60,
                 paddingHorizontal: 10,
                 backgroundColor: isDarkMode ? "#000" : "#fff",
             }}

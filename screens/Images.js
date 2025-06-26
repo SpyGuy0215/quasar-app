@@ -56,7 +56,6 @@ const APODTab = ({ loading, apodData, onImagePress, isDarkMode }) => {
     <View style={{ flex: 1, backgroundColor }}>
       {loading ? (
         <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-          <ActivityIndicator size="small" color={textColor} />
           <Text
             style={{
               marginTop: 8,
@@ -98,7 +97,7 @@ const APODTab = ({ loading, apodData, onImagePress, isDarkMode }) => {
                   resizeMode="contain"
                 />
               </TouchableOpacity>
-              <Text style={{ fontSize: 16, lineHeight: 24, color: textColor }}>
+              <Text style={{ fontSize: 16, lineHeight: 24, color: textColor, marginBottom: 48}}>
                 {apodData.explanation}
               </Text>
             </View>
