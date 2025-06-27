@@ -1,7 +1,6 @@
 // App.js
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // must be at the top
 import { StatusBar } from "expo-status-bar";
-import * as NavigationBar from "expo-navigation-bar";
 import React from "react";
 import { TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
