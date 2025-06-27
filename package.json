@@ -4,8 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web"
   },
   "dependencies": {
@@ -14,12 +14,12 @@
     "@react-navigation/drawer": "^7.3.12",
     "@react-navigation/elements": "^2.4.2",
     "@react-navigation/native-stack": "^7.3.13",
-    "expo": "~53.0.9",
+    "expo": "53.0.13",
     "expo-status-bar": "~2.2.3",
-    "expo-web-browser": "~14.1.6",
+    "expo-web-browser": "~14.2.0",
     "nativewind": "^4.1.23",
     "react": "19.0.0",
-    "react-native": "0.79.2",
+    "react-native": "0.79.4",
     "react-native-awesome-gallery": "^0.4.3",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-gifted-chat": "2.6.3",
@@ -27,11 +27,11 @@
     "react-native-pager-view": "6.7.1",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
-    "react-native-screens": "~4.10.0",
+    "react-native-screens": "~4.11.1",
     "react-native-tab-view": "^4.1.1",
     "tailwindcss": "^3.4.17",
     "expo-file-system": "~18.1.10",
-    "expo-media-library": "~17.1.6",
+    "expo-media-library": "~17.1.7",
     "expo-navigation-bar": "~4.2.6"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 // App.js
+import { GestureHandlerRootView } from "react-native-gesture-handler"; // must be at the top
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
 import React from "react";
@@ -10,7 +11,6 @@ import NewsScreen from "./screens/News";
 import ImagesScreen from "./screens/Images";
 import ExoplanetsScreen from "./screens/Exoplanets";
 import AIScreen from "./screens/AI";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./global.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 
