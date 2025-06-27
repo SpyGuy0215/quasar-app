@@ -8,9 +8,9 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/app/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#111111"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,8 +21,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/app/adaptive-icon.png",
+        "backgroundColor": "#111111"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.shashankprasanna.quasar"
@@ -38,9 +38,15 @@
       "eas": {
         "projectId": "4e8217c4-3790-4b43-9711-278e5f9f29f6"
       },
-      "androidNavigationBar":{
+      "androidNavigationBar": {
         "visible": "sticky-immersive"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4e8217c4-3790-4b43-9711-278e5f9f29f6"
     }
   }
 }
