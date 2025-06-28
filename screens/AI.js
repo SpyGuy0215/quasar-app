@@ -3,7 +3,6 @@ import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { GiftedChat } from "react-native-gifted-chat";
 import "../global.css";
-import QuasarAI from "../assets/quasar-ai-pfp.avif";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../ThemeContext"; // Import useTheme
 
@@ -17,7 +16,7 @@ export default function AI() {
         user: {
             _id: 2,
             name: "Quasar AI",
-            avatar: QuasarAI,
+            avatar: require("../assets/quasar-ai-pfp.png"), // Ensure the path is correct
         },
     };
 
@@ -80,7 +79,7 @@ export default function AI() {
                 user: {
                     _id: 2,
                     name: "Quasar AI",
-                    avatar: QuasarAI,
+                    avatar: require("../assets/quasar-ai-pfp.png"), // Ensure the path is correct
                 },
             };
             setMessages((previousMessages) =>
