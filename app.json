@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "quasar",
+    "slug": "montyhacks-viii",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/app/appicon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/app/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#111111"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shashankprasanna.quasar",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/app/adaptive-icon.png",
+        "backgroundColor": "#111111"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.shashankprasanna.quasar"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-web-browser"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4e8217c4-3790-4b43-9711-278e5f9f29f6"
+      },
+      "androidNavigationBar": {
+        "visible": "sticky-immersive"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/4e8217c4-3790-4b43-9711-278e5f9f29f6"
+    }
+  }
+}
