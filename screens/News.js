@@ -4,6 +4,7 @@ import { FlatList } from "react-native-gesture-handler";
 import NewsCard from "../components/NewsCard";
 import * as WebBrowser from "expo-web-browser";
 import { useTheme } from "../ThemeContext";
+import { Haptics } from "../helper";
 import "../global.css";
 
 const API_URL = "https://api.spaceflightnewsapi.net/v4/articles";
@@ -118,6 +119,7 @@ export default function NewsScreen() {
                                 key={topic}
                                 style={styles.dropdownItem}
                                 onPress={() => {
+                                    Haptics.selection();
                                     setSelectedTopic(topic);
                                     setDropdownVisible(false);
                                 }}
@@ -145,7 +147,10 @@ export default function NewsScreen() {
                     data={newsData}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => (
-                        <Pressable onPress={() => openWebBrowser(item.url)}>
+                        <Pressable onPress={() => {
+                            Haptics.light();
+                            openWebBrowser(item.url);
+                        }}>
                             <NewsCard
                                 title={item.title}
                                 description={item.summary}

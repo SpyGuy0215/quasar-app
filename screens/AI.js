@@ -1,9 +1,10 @@
 // AI.js
 import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { GiftedChat } from "react-native-gifted-chat";
+import { GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import "../global.css";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import Markdown from "react-native-markdown-display";
 import { useTheme } from "../ThemeContext"; // Import useTheme
 
 export default function AI() {
@@ -23,7 +24,7 @@ export default function AI() {
     const defaultSystemMessage = {
         role: "system",
         content:
-            "You are a helpful assistant that answers questions about space. You are part of a mobile app called Quasar. You are friendly, concise, and informative. You just said 'how may I answer your questions about space?' Generally, only respond to the last statement or question from the user. Don't use previous context unless you need to, because the way the data is formatted for you, you oftentimes don't see that you have already responded.",
+            "You are a helpful assistant that answers questions about space. You are part of a mobile app called Quasar. You are friendly, concise, and informative. You just said 'how may I answer your questions about space?' Generally, only respond to the last statement or question from the user. Don't use previous context unless you need to, because the way the data is formatted for you, you oftentimes don't see that you have already responded. No emojis, no emojis, and most importantly, no emojis. Be serious",
     };
 
     const [messages, setMessages] = useState([defaultBotMessage]);
@@ -72,9 +73,15 @@ export default function AI() {
                 }
             );
             const data = await response.json();
+            const responseText = data.choices[0].message.content;
+            const messageText = responseText
+                .replace(/<think>[\s\S]*?<\/think>/gi, "")
+                .trim();
+
+            console.log("AI response:", messageText);
             let botMsg = {
                 _id: Math.random().toString(36).substring(7),
-                text: data.choices[0].message.content,
+                text: messageText || "I don't know how to respond to that.",
                 createdAt: new Date(),
                 user: {
                     _id: 2,
@@ -127,6 +134,7 @@ export default function AI() {
             </TouchableOpacity>
             <GiftedChat
                 messages={messages}
+                key={isDarkMode ? "dark" : "light"}
                 onSend={onSend}
                 user={{
                     _id: 1,
@@ -136,15 +144,24 @@ export default function AI() {
                 renderUsernameOnMessage
                 placeholder="Type a message about the cosmos..."
                 textInputStyle={{
-                    backgroundColor: isDarkMode ? "#000" : "#fff",
+                    backgroundColor: isDarkMode ? "#333" : "#ddd",
                     borderRadius: 20,
                     paddingHorizontal: 10,
-                    paddingVertical: 5,
+                    paddingVertical: 12,
                     fontSize: 16,
                     color: isDarkMode ? "#fff" : "#000",
                     borderWidth: 1,
                     borderColor: isDarkMode ? "#555" : "#ccc",
                 }}
+                renderInputToolbar={(props) => (
+                    <InputToolbar
+                        {...props}
+                        containerStyle={{
+                            backgroundColor: isDarkMode ? "#000" : "#fff",
+                            borderTopWidth: 0,
+                        }}
+                    />
+                )}
                 renderBubble={(props) => {
                     const isUser = props.currentMessage.user._id === 1;
                     return (
@@ -153,28 +170,43 @@ export default function AI() {
                                 backgroundColor: isUser
                                     ? isDarkMode
                                         ? "#444"
-                                        : "#000"
+                                        : "#ccc"
                                     : isDarkMode
-                                    ? "#666"
+                                    ? "#222"
                                     : "#eee",
                                 padding: 10,
                                 borderRadius: 10,
                                 marginBottom: 5,
-                                maxWidth: "80%",
+                                maxWidth: "85%",
                                 alignSelf: isUser ? "flex-end" : "flex-start",
                             }}
                         >
-                            <Text
+                            <Markdown
                                 style={{
-                                    color: isUser
-                                        ? "#fff"
-                                        : isDarkMode
-                                        ? "#fff"
-                                        : "#000",
+                                    body: {
+                                        color: isDarkMode
+                                            ? "#fff" : "#000",
+                                        fontSize: 16,
+                                        backgroundColor: isUser
+                                            ? isDarkMode
+                                                ? "#444"
+                                                : "#ccc"
+                                            : isDarkMode
+                                            ? "#222"
+                                            : "#eee",
+                                    },
+                                    fence: {
+                                        backgroundColor: isDarkMode
+                                            ? "#000"
+                                            : "#fff",
+                                        padding: 10,
+                                        color: isDarkMode ? "#fff" : "#000",
+                                        borderRadius: 5,
+                                    }
                                 }}
                             >
                                 {props.currentMessage.text}
-                            </Text>
+                            </Markdown>
                         </View>
                     );
                 }}
