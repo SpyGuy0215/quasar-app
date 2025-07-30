@@ -10,6 +10,7 @@ import NewsScreen from "./screens/News";
 import ImagesScreen from "./screens/NewImages";
 import ExoplanetsScreen from "./screens/Exoplanets";
 import AIScreen from "./screens/AI";
+import LaunchesScreen from "./screens/Launches";
 import "./global.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import {Haptics} from "./helper";
@@ -83,6 +84,20 @@ function AppContent() {
                         options={{
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="images-outline" size={size} color={color} />
+                            ),
+                        }}
+                        listeners={{
+                            focus: () => {
+                                Haptics.medium();
+                            }
+                        }}
+                    />
+                    <Drawer.Screen
+                        name="Launches"
+                        component={LaunchesScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="rocket-outline" size={size} color={color} />
                             ),
                         }}
                         listeners={{
