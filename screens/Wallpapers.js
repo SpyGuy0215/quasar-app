@@ -7,19 +7,65 @@ import {
     FlatList,
     TouchableOpacity,
     ActivityIndicator,
+    Platform,
 } from "react-native";
 import ImageActionsModal from "../components/ImageActionsModal";
 import { useTheme } from "../ThemeContext";
 import { Haptics } from "../helper";
-import { Picker } from "@react-native-picker/picker";
+import SafeImage from "../components/SafeImage";
+import Dropdown from "../components/Dropdown";
+
+const TOPICS = [
+    "All",
+    "Scenic",
+    "Spacecraft",
+    "Telescopes",
+    "Planets",
+    "Stars",
+    "Galaxies",
+    "Nature",
+    "Wallpapers",
+];
+const KEYWORDS = {
+    All: [],
+    Wallpapers: ["wallpaper", "background"],
+    Scenic: ["landscape", "mountain", "ocean", "forest"],
+    Spacecraft: [
+        "spacecraft",
+        "satellite",
+        "probe",
+        "rocket",
+        "plane",
+        "shuttle",
+        "launch",
+    ],
+    Telescopes: ["telescope", "observatory", "Hubble", "James Webb", "HST", "JWST"],
+    Planets: ["planet", "earth", "mars", "jupiter"],
+    Stars: ["star", "sun", "supernova"],
+    Galaxies: ["galaxy", "milky way", "andromeda"],
+    Nature: [
+        "nature",
+        "forest",
+        "waterfall",
+        "wildlife",
+        "flora",
+        "fauna",
+        "animals",
+        "plants",
+    ],
+};
 
 export default function WallpapersScreen() {
     const [images, setImages] = React.useState([]);
     const [page, setPage] = React.useState(1);
-    const [selectedSearchTerm, setSelectedSearchTerm] = React.useState([]); // Default search term
+    const [selectedSearchTerm, setSelectedSearchTerm] = React.useState("All");
+    const [selectedSearchKeywords, setSelectedSearchKeywords] = React.useState(
+        []
+    ); // Default search term
     const [modalInfo, setModalInfo] = React.useState({
         isVisible: false,
         imageUrl: "",
+        backupURL: "",
         authorName: "",
         date: "",
         title: "",
@@ -30,10 +76,17 @@ export default function WallpapersScreen() {
     useEffect(() => {
         console.log("Fetching images for page:", page);
         fetchImages();
-    }, [page, selectedSearchTerm]); // Add selectedSearchTerm to the dependency array
+    }, [page, selectedSearchKeywords]); // Add selectedSearchTerm to the dependency array
 
     function fetchImages() {
-        const keywords = selectedSearchTerm.join(","); // Convert array to comma-separated string
+        console.log("Selected search term:", selectedSearchKeywords);
+        let keywords = [];
+        if (selectedSearchKeywords.length === 0) {
+            console.log("No search term selected, fetching default images");
+        } else {
+            keywords = selectedSearchKeywords.join(","); // Convert array to comma-separated string
+            console.log("Fetching images with keywords:", keywords);
+        }
         console.log("Fetching images with keywords:", keywords);
         let url = `https://images-api.nasa.gov/search?keywords=[${keywords}]&media_type=image&page_size=20&page=${page}`;
         if (keywords.length === 0) {
@@ -73,6 +126,14 @@ export default function WallpapersScreen() {
             });
     }
 
+    function handleDropdownSelect(item) {
+        setSelectedSearchKeywords(KEYWORDS[item] || []);
+        setSelectedSearchTerm(item);
+        console.log("Selected search term:", item);
+        setImages([]);
+        setPage(1);
+    }
+
     return (
         <View className="flex-1">
             <ImageActionsModal
@@ -83,54 +144,17 @@ export default function WallpapersScreen() {
                 date={modalInfo.date}
                 title={modalInfo.title}
             />
-            <Picker
-                selectedValue={selectedSearchTerm}
-                onValueChange={(itemValue) => {
-                    setSelectedSearchTerm(itemValue);
-                    setPage(1); // Reset page to 1
-                    setImages([]); // Clear current images
+            <Dropdown
+                placeholder="Select a category"
+                items={TOPICS}
+                selectedItem={
+                    selectedSearchTerm?.length > 0 ? selectedSearchTerm : "All"
+                }
+                onSelect={(item) => {
+                    handleDropdownSelect(item);
                 }}
-                style={{ margin: 10, height: 50, backgroundColor: isDarkMode ? "#333" : "#eee", color: isDarkMode ? "#fff" : "#000"}}
-            >
-                <Picker.Item label="All" value={[]} />
-                <Picker.Item
-                    label="Spacecraft"
-                    value={[
-                        "rocket",
-                        "rockets",
-                        "spacecraft",
-                        "space shuttle",
-                        "shuttle",
-                        "launch",
-                        "satellite",
-                    ]}
-                />
-                <Picker.Item
-                    label="Space Telescope"
-                    value={["hubble", "telescope", "space telescope"]}
-                />
-                <Picker.Item label="Stars" value={["star", "stars", "sun"]} />
-                <Picker.Item
-                    label="Planets"
-                    value={[
-                        "planet",
-                        "planetary",
-                        "Mercury",
-                        "Venus",
-                        "Earth",
-                        "Mars",
-                        "Jupiter",
-                        "Saturn",
-                        "Uranus",
-                        "Neptune",
-                    ]}
-                />
-                <Picker.Item
-                    label="Galaxies"
-                    value={["galaxy", "galaxies", "milky way"]}
-                />
-                <Picker.Item label="Nebulae" value={["nebula", "nebulae"]} />
-            </Picker>
+                tailwindStyles="my-3"
+            />
             <FlatList
                 data={images}
                 keyExtractor={(item, index) => index.toString()}
@@ -142,13 +166,12 @@ export default function WallpapersScreen() {
                     <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={() => {
-                            const imageUrl =
-                                item.links && item.links[0]
-                                    ? item.links[0].href
-                                    : "https://via.placeholder.com/150";
+                            const imageUrl  = item.links[0] ? item.links[0].href : null;
+                            const backupImageUrl = item.links[1] ? item.links[1].href : null;
                             setModalInfo({
                                 isVisible: true,
                                 imageUrl: imageUrl,
+                                backupImageUrl: backupImageUrl,
                                 authorName:
                                     item.data && item.data[0]
                                         ? item.data[0].photographer || "Unknown"
@@ -181,18 +204,14 @@ export default function WallpapersScreen() {
                                 }}
                             />
                         )}
-                        <Image
+                        <SafeImage
                             style={{
                                 width: "100%",
                                 height: 230,
                                 borderRadius: 20,
                             }}
-                            source={{
-                                uri:
-                                    item.links && item.links[1]
-                                        ? item.links[1].href
-                                        : "https://via.placeholder.com/150",
-                            }}
+                            defaultURL={item.links[1]? item.links[1].href : null}
+                            backupURL={item.links[0]? item.links[0].href : ""}
                             resizeMode="cover"
                             onLoadStart={() => {
                                 const imageUrl =

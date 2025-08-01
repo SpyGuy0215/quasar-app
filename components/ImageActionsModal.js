@@ -2,6 +2,7 @@ import React, { useState } from "react"; // Add useState for managing loading st
 import {
     Modal,
     View,
+    ScrollView,
     Text,
     Image,
     TouchableOpacity,
@@ -17,11 +18,13 @@ import * as MediaLibrary from "expo-media-library";
 import { Haptics } from "../helper"; // Import Haptics for feedback
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StatusBar } from "expo-status-bar";
+import SafeImage from "./SafeImage"; // Import SafeImage component
 
 export default function ImageActionsModal({
     isVisible,
     onClose,
     imageUrl,
+    backupImageUrl = "https://placehold.co/800x800.jpg",
     albumName = "Quasar",
     authorName = "NASA",
     title = "Image",
@@ -29,7 +32,6 @@ export default function ImageActionsModal({
 }) {
     const { isDarkMode } = useTheme(); // Get dark mode value from context
     const [isLoading, setIsLoading] = useState(true); // State to track image loading
-    console.log("Image URL:", imageUrl);
 
     async function checkImageStatus() {
         // get the name of the image from the URL
@@ -158,11 +160,12 @@ export default function ImageActionsModal({
             animationType="slide"
         >
             <View className="flex flex-col flex-1 bg-zinc-100">
-                <View
+                <ScrollView
                     style={{
-                        flex: 1, // Ensure the parent View takes up the full screen
-                        position: "relative", // Ensure child elements are positioned relative to this View
+                        flex: 1,
+                        position: "relative",
                     }}
+                    alwaysBounceVertical={false}
                 >
                     {isLoading && (
                         <View
@@ -185,9 +188,10 @@ export default function ImageActionsModal({
                             />
                         </View>
                     )}
-                    <Image
-                        source={{ uri: imageUrl }}
-                        className="w-full h-[70vh] "
+                    <SafeImage
+                        defaultURL={imageUrl}
+                        backupURL={backupImageUrl}
+                        className="w-full h-[70vh]"
                         onLoad={() => setIsLoading(false)} // Set loading to false when image loads
                         onError={() => setIsLoading(false)} // Handle error case
                     />
@@ -209,7 +213,7 @@ export default function ImageActionsModal({
                         <Ionicons name="close" size={24} color="#fff" />
                     </TouchableOpacity>
                     <View
-                        className={"w-full h-[30vh]"}
+                        className={"w-full min-h-[30vh]"}
                         style={{
                             backgroundColor: isDarkMode ? "#000" : "#fff",
                         }}
@@ -226,7 +230,7 @@ export default function ImageActionsModal({
                         </Text>
                         <View className="flex flex-row justify-between items-center mb-6 mx-8">
                             <Text
-                                className="font-semibold my-auto"
+                                className="font-semibold my-auto max-w-[50vw]"
                                 style={{
                                     color: isDarkMode ? "#aaa" : "#555",
                             }}
@@ -234,7 +238,7 @@ export default function ImageActionsModal({
                                 {authorName}
                             </Text>
                             <Text
-                                className="font-semibold my-auto"
+                                className="font-semibold my-auto max-w-[50vw]"
                                 style={{
                                     color: isDarkMode ? "#aaa" : "#555",
                             }}
@@ -273,7 +277,7 @@ export default function ImageActionsModal({
                             </Text>
                         </TouchableOpacity>
                     </View>
-                </View>
+                </ScrollView>
             </View>
         </Modal>
     );

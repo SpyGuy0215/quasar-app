@@ -5,12 +5,12 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        space: {
-          background: "#0b1d2c", 
-          accent: "#1e3a5f", 
-          text: "#d1e8ff", 
-          highlight: "#ffcc00", 
-        },
+        galaxy: {
+            darkbg: "#1a1a1a",
+            darkborder: "#333",
+            lightbg: "#fff",
+            lightborder: "#e5e7eb",
+        }
       },
     },
   },

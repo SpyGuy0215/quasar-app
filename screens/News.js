@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, Modal, StyleSheet, TouchableOpacity } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import NewsCard from "../components/NewsCard";
+import Dropdown from "../components/Dropdown";
 import * as WebBrowser from "expo-web-browser";
 import { useTheme } from "../ThemeContext";
 import { Haptics } from "../helper";
@@ -58,7 +59,6 @@ export default function NewsScreen() {
     const [newsData, setNewsData] = useState([]);
     const [newsDataOffset, setNewsDataOffset] = useState(0);
     const [selectedTopic, setSelectedTopic] = useState("all");
-    const [dropdownVisible, setDropdownVisible] = useState(false);
 
     useEffect(() => {
         fetchNewsData(true, selectedTopic);
@@ -77,69 +77,17 @@ export default function NewsScreen() {
 
     const backgroundColor = isDarkMode ? "#000" : "#f3f4f6";
     const textColor = isDarkMode ? "#fff" : "#000";
-    const buttonColor = isDarkMode ? "#222" : "#fff";
-    const borderColor = isDarkMode ? "#444" : "#ccc";
-    const checkmarkColor = "#2196F3"; // blue
 
     return (
         <View style={{ flex: 1, backgroundColor }}>
-            {/* Dropdown Button */}
-            <View style={{ padding: 16, backgroundColor }}>
-                <Pressable
-                    style={[
-                        styles.dropdownButton,
-                        { backgroundColor: buttonColor, borderColor: borderColor },
-                    ]}
-                    onPress={() => setDropdownVisible(true)}
-                >
-                    <Text style={{ color: textColor, fontWeight: "bold" }}>
-                        {selectedTopic === "all" ? "All Topics" : selectedTopic}
-                    </Text>
-                    <Text style={{ color: textColor, marginLeft: 8 }}>▼</Text>
-                </Pressable>
-            </View>
-            {/* Dropdown Modal */}
-            <Modal
-                visible={dropdownVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setDropdownVisible(false)}
-            >
-                <TouchableOpacity
-                    style={styles.modalOverlay}
-                    activeOpacity={1}
-                    onPressOut={() => setDropdownVisible(false)}
-                >
-                    <View style={[
-                        styles.dropdownMenu,
-                        { backgroundColor: buttonColor, borderColor: borderColor }
-                    ]}>
-                        {TOPICS.map((topic) => (
-                            <Pressable
-                                key={topic}
-                                style={styles.dropdownItem}
-                                onPress={() => {
-                                    Haptics.selection();
-                                    setSelectedTopic(topic);
-                                    setDropdownVisible(false);
-                                }}
-                            >
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                    <Text style={{ color: textColor, fontSize: 16, flex: 1 }}>
-                                        {topic === "all" ? "All Topics" : topic}
-                                    </Text>
-                                    {selectedTopic === topic && (
-                                        <Text style={{ color: checkmarkColor, fontSize: 18, marginLeft: 8 }}>
-                                            {"\u2713"}
-                                        </Text>
-                                    )}
-                                </View>
-                            </Pressable>
-                        ))}
-                    </View>
-                </TouchableOpacity>
-            </Modal>
-            {/* News List */}
+            <Dropdown
+                items={TOPICS}
+                selectedItem={selectedTopic}
+                onSelect={(item) => {
+                    setSelectedTopic(item);
+                }}
+                tailwindStyles="my-3"
+            />
             {newsData.length > 0 ? (
                 <FlatList
                     style={{ backgroundColor, flex: 1 }}
@@ -174,36 +122,3 @@ export default function NewsScreen() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    dropdownButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-        borderRadius: 8,
-        borderWidth: 1,
-        width: "100%",
-        alignSelf: "stretch",
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.2)",
-        justifyContent: "flex-start",
-        alignItems: "center",
-        paddingTop: 80,
-    },
-    dropdownMenu: {
-        width: "90%",
-        maxWidth: 400,
-        borderRadius: 8,
-        borderWidth: 1,
-        paddingVertical: 8,
-        elevation: 5,
-    },
-    dropdownItem: {
-        paddingVertical: 12,
-        paddingHorizontal: 16,
-    },
-});

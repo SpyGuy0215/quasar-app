@@ -6,6 +6,7 @@ import { FlatList } from "react-native-gesture-handler";
 import Countdown from "../components/Countdown";
 import { Ionicons } from "@expo/vector-icons";
 import * as Calendar from "expo-calendar";
+import SafeImage from "../components/SafeImage";
 
 const api_base = "https://ll.thespacedevs.com/2.3.0/launches/upcoming/";
 
@@ -146,6 +147,8 @@ export default function LaunchesScreen() {
                                 isDarkMode ? "border-[#333]" : "border-[#ccc]"
                             }`}
                         >
+                            {console.log("[Launches.js] Rendering item:", item.name)}
+                            {console.log("[Launches.js] Item image details:", item.image)}
                             <View
                                 className={`flex flex-col w-[60%] pr-4 text-center justify-between p-4 ${
                                     isDarkMode ? "bg-[#1a1a1a]" : "bg-white"
@@ -172,12 +175,9 @@ export default function LaunchesScreen() {
                                 />
                             </View>
                             <View className="relative w-[41%]">
-                                <Image
-                                    source={
-                                        item.image?.thumbnail_url
-                                            ? { uri: item.image.thumbnail_url }
-                                            : require("../assets/images/rocket-generic.jpg")
-                                    }
+                                <SafeImage
+                                    defaultURL={item.image ? item.image.image_url : null}
+                                    backupURL={"https://static.wikia.nocookie.net/starwars/images/2/21/MF_over_Takodana_SWCT.png/revision/latest?cb=20200730064538"}
                                     className="w-full"
                                     style={{ aspectRatio: 1 }}
                                 />
