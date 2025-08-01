@@ -1,20 +1,33 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { useColorScheme } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-    // null = follow system, 'light' or 'dark' = user override
-    const [userPreference, setUserPreference] = useState(null);
-    const systemScheme = useColorScheme(); // 'light' | 'dark' | null
+    const [userPreference, setUserPreference] = useState('system');
+    const systemScheme = useColorScheme();
 
+    useEffect(() => {
+        // Load user preference from AsyncStorage on mount
+        const loadPreference = async () => {
+            try {
+                const storedPreference = await AsyncStorage.getItem("theme_preference");
+                if (storedPreference) {
+                    setUserPreference(storedPreference);
+                }
+                console.log("[ThemeContext] Loaded user preference:", storedPreference);
+            } catch (error) {
+                console.error("[ThemeContext] Error loading theme preference:", error);
+            }
+        };
+        loadPreference();
+    }, []);
 
-    // Log current theme state for debugging
-    console.log('[ThemeContext] systemScheme:', systemScheme, 'userPreference:', userPreference);
 
     // Robust isDarkMode logic: if userPreference is null, follow system; else use userPreference
     let isDarkMode;
-    if (userPreference === null) {
+    if (userPreference === 'system') {
         isDarkMode = systemScheme === 'dark';
     } else {
         isDarkMode = userPreference === 'dark';
@@ -23,19 +36,34 @@ export function ThemeProvider({ children }) {
     // Cycles: system -> dark -> light -> system ...
     const toggleTheme = () => {
         setUserPreference((prev) => {
-            if (prev === null) {
-                return 'dark';
+            let newPreference;
+            if (prev === 'system') {
+                newPreference = 'dark';
             } else if (prev === 'dark') {
-                return 'light';
+                newPreference = 'light';
             } else if (prev === 'light') {
-                return null; // back to system
+                newPreference = 'system'; // back to system
             }
-            return null;
+            console.log("[ThemeContext] Toggling theme to:", newPreference);
+            
+            // Store the new preference in AsyncStorage
+            AsyncStorage.setItem("theme_preference", newPreference);
+            return newPreference;
         });
     };
 
+    const setTheme = (theme) => {
+        if (theme !== 'dark' && theme !== 'light' && theme !== 'system') {
+            console.error("[ThemeContext] Invalid theme value:", theme);
+            return;
+        }
+        console.log("[ThemeContext] Setting theme to:", theme);
+        setUserPreference(theme);
+        AsyncStorage.setItem("theme_preference", theme);
+    };
+
     return (
-        <ThemeContext.Provider value={{ isDarkMode, toggleTheme, userPreference, systemScheme }}>
+        <ThemeContext.Provider value={{ isDarkMode, toggleTheme, setTheme, userPreference, systemScheme }}>
             {children}
         </ThemeContext.Provider>
     );

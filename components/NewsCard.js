@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image } from "react-native";
+import { View, Text } from "react-native";
+import SafeImage from "./SafeImage";
 import { truncateText } from "../helper";
 import { useTheme } from "../ThemeContext";
 
@@ -13,7 +14,7 @@ export default function NewsCard({ title, description, imageUrl, publishedAt }) 
         borderWidth: 1,
         borderRadius: 24,
         padding: 16,
-        marginHorizontal: 20,
+        marginHorizontal: 12,
         marginVertical: 8,
     };
 
@@ -39,7 +40,7 @@ export default function NewsCard({ title, description, imageUrl, publishedAt }) 
         width: "100%",
         height: 170,
         borderRadius: 16,
-        marginBottom: 4,
+        marginBottom: 2,
     };
 
     return (
@@ -48,8 +49,9 @@ export default function NewsCard({ title, description, imageUrl, publishedAt }) 
             <Text style={dateStyle}>{publishedAt}</Text>
             <Text style={descriptionStyle}>{description}</Text>
             {imageUrl && (
-                <Image
-                    source={{ uri: imageUrl }}
+                <SafeImage
+                    defaultURL={imageUrl}
+                    backupURL={imageUrl}
                     style={imageStyle}
                     resizeMode="cover"
                 />

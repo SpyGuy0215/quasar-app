@@ -3,11 +3,11 @@ import {
     View,
     Text,
     ActivityIndicator,
-    FlatList,
     TextInput,
     TouchableOpacity,
     ScrollView
 } from "react-native";
+import { FlashList } from "@shopify/flash-list";
 import * as FileSystem from "expo-file-system";
 import { useTheme } from "../ThemeContext";
 
@@ -73,7 +73,7 @@ export default function ExoplanetsScreen() {
         }
     };
 
-    const backgroundColor = isDarkMode ? "#000" : "#fff";
+    const backgroundColor = isDarkMode ? "#000" : "#f3f4f6";
     const textColor = isDarkMode ? "#fff" : "#000";
     const inputBackground = isDarkMode ? "#1a1a1a" : "#fff";
     const borderColor = isDarkMode ? "#333" : "#ccc";
@@ -140,9 +140,12 @@ export default function ExoplanetsScreen() {
                 value={searchQuery}
                 onChangeText={handleSearch}
             />
-            <FlatList
+            <FlashList
                 data={filteredData}
                 keyExtractor={(item, index) => index.toString()}
+                initialNumToRender={10}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={10}
                 renderItem={({ item }) => (
                     <TouchableOpacity
                         style={{

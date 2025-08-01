@@ -31,8 +31,22 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-web-browser"
+     "plugins": [
+      "expo-web-browser",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Quasar needs access to your photos to save images.",
+          "savePhotosPermission": "Quasar needs access to your photos to save images."
+        }
+      ],
+      [
+        "expo-calendar",
+        {
+          "remindersPermission": "Quasar needs access to your reminders to add events.",
+          "eventsPermission": "Quasar needs access to your calendar to add events."
+        }
+      ]
     ],
     "extra": {
       "eas": {

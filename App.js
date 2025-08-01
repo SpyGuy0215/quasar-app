@@ -11,6 +11,7 @@ import ImagesScreen from "./screens/NewImages";
 import ExoplanetsScreen from "./screens/Exoplanets";
 import AIScreen from "./screens/AI";
 import LaunchesScreen from "./screens/Launches";
+import SettingsScreen from "./screens/Settings";
 import "./global.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import {Haptics} from "./helper";
@@ -18,9 +19,8 @@ import {Haptics} from "./helper";
 const Drawer = createDrawerNavigator();
 
 function AppContent() {
-    const { isDarkMode, toggleTheme, userPreference, systemScheme } = useTheme();
+    const { isDarkMode, toggleTheme, userPreference } = useTheme();
 
-    // Pick icon based on theme mode
     let iconName;
     if (userPreference === null) {
         iconName = "contrast-outline"; // system
@@ -51,7 +51,7 @@ function AppContent() {
         },
         headerRight: () => (
             <TouchableOpacity onPress={() => {
-                Haptics.soft();
+                Haptics.selection();
                 toggleTheme();
             }} style={{ marginRight: 16 }}>
                 <Ionicons name={iconName} size={24} color={isDarkMode ? "#fff" : "#000"} />
@@ -126,6 +126,20 @@ function AppContent() {
                         options={{
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="hardware-chip-outline" size={size} color={color} />
+                            ),
+                        }}
+                        listeners={{
+                            focus: () => {
+                                Haptics.medium();
+                            }
+                        }}
+                    />
+                    <Drawer.Screen
+                        name="Settings"
+                        component={SettingsScreen}
+                        options={{
+                            drawerIcon: ({ color, size }) => (
+                                <Ionicons name="settings-outline" size={size} color={color} />
                             ),
                         }}
                         listeners={{

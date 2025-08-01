@@ -1,4 +1,4 @@
-import React, { useState } from "react"; // Add useState for managing loading state
+import React, { useEffect, useState } from "react"; // Add useState for managing loading state
 import {
     Modal,
     View,
@@ -17,7 +17,7 @@ import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import { Haptics } from "../helper"; // Import Haptics for feedback
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StatusBar } from "expo-status-bar";
+import * as Progress from 'react-native-progress';
 import SafeImage from "./SafeImage"; // Import SafeImage component
 
 export default function ImageActionsModal({
@@ -32,6 +32,7 @@ export default function ImageActionsModal({
 }) {
     const { isDarkMode } = useTheme(); // Get dark mode value from context
     const [isLoading, setIsLoading] = useState(true); // State to track image loading
+    const [progress, setProgress] = useState(0); // State to track download progress
 
     async function checkImageStatus() {
         // get the name of the image from the URL
@@ -152,12 +153,23 @@ export default function ImageActionsModal({
         }
     }
 
+    function handleClose(){
+        setIsLoading(true);
+        setProgress(0);
+        onClose();
+        console.log("[ImageActionsModal] Modal closed");
+    }
+
     return (
         <Modal
             transparent={true}
             visible={isVisible}
-            onRequestClose={onClose}
+            onRequestClose={handleClose}
             animationType="slide"
+            onShow={() => {
+                console.log("[ImageActionsModal] Modal shown");
+                console.log(`[ImageActionsModal] Image URL: ${imageUrl}`);
+            }}
         >
             <View className="flex flex-col flex-1 bg-zinc-100">
                 <ScrollView
@@ -167,36 +179,36 @@ export default function ImageActionsModal({
                     }}
                     alwaysBounceVertical={false}
                 >
-                    {isLoading && (
-                        <View
-                            style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                backgroundColor: "rgba(0, 0, 0, 0.7)", // Darker semi-transparent background
-                                elevation: 10, // For Android z-index equivalent
-                                zIndex: 100, // Ensure it appears above all elements
-                            }}
-                        >
-                            <ActivityIndicator
-                                size="large"
-                                color={isDarkMode ? "#fff" : "#000"}
+                    <View className="w-full h-[70vh] relative">
+                        { isLoading && (
+                            <Progress.Bar
+                                progress={progress}
+                                width={200}
+                                borderRadius={100}
+                                height={10}
+                                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 border border-red-500 z-10"
                             />
-                        </View>
-                    )}
-                    <SafeImage
+                        )}
+                        <SafeImage
                         defaultURL={imageUrl}
                         backupURL={backupImageUrl}
-                        className="w-full h-[70vh]"
-                        onLoad={() => setIsLoading(false)} // Set loading to false when image loads
-                        onError={() => setIsLoading(false)} // Handle error case
+                        className="w-full h-full"
+                        onProgress={(event) => {
+                            console.log("[ImageActionsModal] Image progress:", event.loaded/event.total);
+                            console.log("[ImageActionsModal] ", isLoading);
+                            setProgress(event.loaded/event.total);
+                        }}
+                        onLoad={() => {
+                            console.log("[ImageActionsModal] Image loaded successfully");
+                            setIsLoading(false);
+                        }} // Set loading to false when image loads
+                        onError={(e) => {
+                            console.error(("[ImageActionsModal] Error loading image:", e));
+                        }}
                     />
+                    </View>
                     <TouchableOpacity
-                        onPress={onClose}
+                        onPress={handleClose}
                         style={{
                             position: "absolute",
                             top: Platform.OS === "android" ? 20 : 50,
@@ -233,7 +245,7 @@ export default function ImageActionsModal({
                                 className="font-semibold my-auto max-w-[50vw]"
                                 style={{
                                     color: isDarkMode ? "#aaa" : "#555",
-                            }}
+                                }}
                             >
                                 {authorName}
                             </Text>
@@ -241,7 +253,7 @@ export default function ImageActionsModal({
                                 className="font-semibold my-auto max-w-[50vw]"
                                 style={{
                                     color: isDarkMode ? "#aaa" : "#555",
-                            }}
+                                }}
                             >
                                 {date == ""
                                     ? "Unknown Date"
@@ -268,10 +280,10 @@ export default function ImageActionsModal({
                             <Text
                                 className={
                                     "text-2xl font-semibold text-center py-4 rounded-xl"
-                            }
-                            style={{
-                                color: isDarkMode ? "#fff" : "#000",
-                            }}
+                                }
+                                style={{
+                                    color: isDarkMode ? "#fff" : "#000",
+                                }}
                             >
                                 Download
                             </Text>

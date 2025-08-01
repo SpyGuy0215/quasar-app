@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { View, Text, Image, Alert, ActivityIndicator, Platform } from "react-native";
 import { useTheme } from "../ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FlatList } from "react-native-gesture-handler";
+import { FlashList } from "@shopify/flash-list";
 import Countdown from "../components/Countdown";
 import { Ionicons } from "@expo/vector-icons";
 import * as Calendar from "expo-calendar";
@@ -138,7 +138,7 @@ export default function LaunchesScreen() {
                     style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
                 />
             ) : (
-                <FlatList
+                <FlashList
                     data={launches.results}
                     keyExtractor={(item) => item.id.toString()}
                     renderItem={({ item }) => (

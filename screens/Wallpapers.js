@@ -4,12 +4,12 @@ import {
     Image,
     Text,
     ScrollView,
-    FlatList,
     TouchableOpacity,
     ActivityIndicator,
     Platform,
 } from "react-native";
 import ImageActionsModal from "../components/ImageActionsModal";
+import { FlashList } from "@shopify/flash-list";
 import { useTheme } from "../ThemeContext";
 import { Haptics } from "../helper";
 import SafeImage from "../components/SafeImage";
@@ -155,7 +155,7 @@ export default function WallpapersScreen() {
                 }}
                 tailwindStyles="my-3"
             />
-            <FlatList
+            <FlashList
                 data={images}
                 keyExtractor={(item, index) => index.toString()}
                 onEndReached={() => {

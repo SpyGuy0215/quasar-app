@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, Pressable, Modal, StyleSheet, TouchableOpacity } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
+import { FlashList } from "@shopify/flash-list";
 import NewsCard from "../components/NewsCard";
 import Dropdown from "../components/Dropdown";
 import * as WebBrowser from "expo-web-browser";
@@ -89,7 +89,7 @@ export default function NewsScreen() {
                 tailwindStyles="my-3"
             />
             {newsData.length > 0 ? (
-                <FlatList
+                <FlashList
                     style={{ backgroundColor, flex: 1 }}
                     contentContainerStyle={{ paddingBottom: 24 }}
                     data={newsData}

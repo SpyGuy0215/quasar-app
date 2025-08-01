@@ -1,5 +1,8 @@
 import { use, useEffect, useState } from "react";
-import { Image } from "react-native";
+import { Image } from "expo-image";
+import { cssInterop } from "nativewind";
+
+cssInterop(Image, {className: "style"}); // Fixes nativewind className support for Image component
 
 export default function SafeImage({
     defaultURL,
@@ -9,22 +12,22 @@ export default function SafeImage({
     onLoad,
     onLoadStart,
     onLoadEnd,
+    onProgress,
     className = "",
 }) {
     const [error, setError] = useState(false);
     if (error || !defaultURL) {
-        console.warn(
-            `Error loading image from ${defaultURL}, falling back to backup URL: ${backupURL}`
-        );
         return (
             <Image
                 source={{ uri: backupURL }}
                 style={style}
-                resizeMode={resizeMode}
+                contentFit={resizeMode}
                 onLoadStart={onLoadStart}
                 onLoadEnd={onLoadEnd}
                 onLoad={onLoad}
-                onError={() => console.error("Error loading image")}
+                onProgress={onProgress}
+                cachePolicy={"memory-disk"}
+                onError={() => console.error("[SafeImage] Error loading image")}
                 className={className}
             />
         );
@@ -33,13 +36,15 @@ export default function SafeImage({
         <Image
             source={{ uri: defaultURL }}
             style={style}
-            resizeMode={resizeMode}
+            contentFit={resizeMode}
+            cachePolicy={"memory-disk"}
+            onLoad={onLoad}
             onLoadStart={onLoadStart}
             onLoadEnd={onLoadEnd}
+            onProgress={onProgress}
             className={className}
-            onLoad={onLoad}
             onError={(e) => {
-                console.error("[SafeImage] Error loading image:", e.nativeEvent.error);
+                console.error("[SafeImage] Error loading image, attempting backup:", e.nativeEvent.error);
                 setError(true);
             }}
         />
