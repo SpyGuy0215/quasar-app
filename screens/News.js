@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, Modal, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, Pressable, TextInput, StyleSheet } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import NewsCard from "../components/NewsCard";
 import Dropdown from "../components/Dropdown";
@@ -9,27 +9,15 @@ import { Haptics } from "../helper";
 import "../global.css";
 
 const API_URL = "https://api.spaceflightnewsapi.net/v4/articles";
+const TOPICS = ["all", "NASA", "Exoplanets", "Planets", "Asteroids", "Moons", "SpaceX", "Black Holes", "Galaxies", "Comets"];
 
-// Hardcoded topics
-const TOPICS = [
-    "all",
-    "NASA",
-    "Exoplanets",
-    "Planets",
-    "Asteroids",
-    "Moons",
-    "SpaceX",
-    "Black Holes",
-    "Galaxies",
-    "Comets",
-];
-
-async function callNewsAPI(offset = 0, topic = "") {
+async function callNewsAPI(offset = 0, topic = "", query = "") {
     try {
         let url = `${API_URL}?offset=${offset}`;
-        if (topic && topic !== "all") {
-            url += `&title_contains=${encodeURIComponent(topic)}`;
-        }
+        const filters = [];
+        if (topic && topic !== "all") filters.push(`title_contains=${encodeURIComponent(topic)}`);
+        if (query) filters.push(`title_contains=${encodeURIComponent(query)}`);
+        if (filters.length) url += `&${filters.join("&")}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
@@ -59,13 +47,22 @@ export default function NewsScreen() {
     const [newsData, setNewsData] = useState([]);
     const [newsDataOffset, setNewsDataOffset] = useState(0);
     const [selectedTopic, setSelectedTopic] = useState("all");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedQuery, setDebouncedQuery] = useState("");
 
     useEffect(() => {
-        fetchNewsData(true, selectedTopic);
-    }, [selectedTopic]);
+        const handler = setTimeout(() => {
+            setDebouncedQuery(searchQuery);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchQuery]);
 
-    async function fetchNewsData(refresh = true, topic = selectedTopic) {
-        const data = await callNewsAPI(refresh ? 0 : newsDataOffset, topic);
+    useEffect(() => {
+        fetchNewsData(true, selectedTopic, debouncedQuery);
+    }, [selectedTopic, debouncedQuery]);
+
+    async function fetchNewsData(refresh = true, topic = selectedTopic, query = debouncedQuery) {
+        const data = await callNewsAPI(refresh ? 0 : newsDataOffset, topic, query);
         if (!refresh && newsData.length > 0) {
             setNewsData((prev) => [...prev, ...data]);
             setNewsDataOffset((prev) => prev + data.length);
@@ -77,15 +74,30 @@ export default function NewsScreen() {
 
     const backgroundColor = isDarkMode ? "#000" : "#f3f4f6";
     const textColor = isDarkMode ? "#fff" : "#000";
+    const inputStyle = {
+        backgroundColor: isDarkMode ? "#1a1a1a" : "#fff",
+        color: textColor,
+        padding: 10,
+        margin: 12,
+        borderRadius: 10,
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: isDarkMode ? "#333" : "#ccc",
+    };
 
     return (
         <View style={{ flex: 1, backgroundColor }}>
+            <TextInput
+                style={inputStyle}
+                placeholder="Search space news..."
+                placeholderTextColor={isDarkMode ? "#888" : "#666"}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+            />
             <Dropdown
                 items={TOPICS}
                 selectedItem={selectedTopic}
-                onSelect={(item) => {
-                    setSelectedTopic(item);
-                }}
+                onSelect={(item) => setSelectedTopic(item)}
                 tailwindStyles="my-3"
             />
             {newsData.length > 0 ? (
@@ -109,7 +121,7 @@ export default function NewsScreen() {
                         </Pressable>
                     )}
                     onEndReached={() => {
-                        fetchNewsData(false, selectedTopic);
+                        fetchNewsData(false, selectedTopic, debouncedQuery);
                     }}
                     onEndReachedThreshold={3}
                     showsVerticalScrollIndicator={false}
