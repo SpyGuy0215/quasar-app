@@ -1,7 +1,7 @@
 // App.js
 import { GestureHandlerRootView } from "react-native-gesture-handler"; // must be at the top
 import { StatusBar } from "expo-status-bar";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createDrawerNavigator } from "@react-navigation/drawer";
@@ -15,11 +15,26 @@ import SettingsScreen from "./screens/Settings";
 import "./global.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
 import {Haptics} from "./helper";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Drawer = createDrawerNavigator();
 
 function AppContent() {
     const { isDarkMode, toggleTheme, userPreference } = useTheme();
+    const [aiTabEnabled, setAiTabEnabled] = useState(true);
+    const [loadingTabs, setLoadingTabs] = useState(true);
+
+    // Callback to update tab state instantly
+    const updateAiTabEnabled = (value) => {
+        setAiTabEnabled(value);
+    };
+
+    useEffect(() => {
+        AsyncStorage.getItem('quasarAiTabEnabled').then(val => {
+            setAiTabEnabled(val === null || val === 'true');
+            setLoadingTabs(false);
+        });
+    }, []);
 
     let iconName;
     if (userPreference === null) {
@@ -58,6 +73,10 @@ function AppContent() {
             </TouchableOpacity>
         ),
     };
+
+    if (loadingTabs) {
+        return null; // or a loading spinner
+    }
 
     return (
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: isDarkMode ? "#000" : "#fff" }} className={isDarkMode ? "dark" : ""}>
@@ -120,23 +139,26 @@ function AppContent() {
                             }
                         }}
                     />
-                    <Drawer.Screen
-                        name="Quasar AI"
-                        component={AIScreen}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="hardware-chip-outline" size={size} color={color} />
-                            ),
-                        }}
-                        listeners={{
-                            focus: () => {
-                                Haptics.medium();
-                            }
-                        }}
-                    />
+                    {aiTabEnabled && (
+                        <Drawer.Screen
+                            name="Quasar AI"
+                            component={AIScreen}
+                            options={{
+                                drawerIcon: ({ color, size }) => (
+                                    <Ionicons name="hardware-chip-outline" size={size} color={color} />
+                                ),
+                            }}
+                            listeners={{
+                                focus: () => {
+                                    Haptics.medium();
+                                }
+                            }}
+                        />
+                    )}
                     <Drawer.Screen
                         name="Settings"
-                        component={SettingsScreen}
+                        // Pass updateAiTabEnabled as a prop to SettingsScreen
+                        children={props => <SettingsScreen {...props} updateAiTabEnabled={updateAiTabEnabled} />}
                         options={{
                             drawerIcon: ({ color, size }) => (
                                 <Ionicons name="settings-outline" size={size} color={color} />

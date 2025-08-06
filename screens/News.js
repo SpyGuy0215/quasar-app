@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Pressable, TextInput, StyleSheet } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, Pressable, TextInput, StyleSheet, Platform } from "react-native";
 import { FlashList } from "@shopify/flash-list";
 import NewsCard from "../components/NewsCard";
 import Dropdown from "../components/Dropdown";
@@ -7,6 +7,58 @@ import * as WebBrowser from "expo-web-browser";
 import { useTheme } from "../ThemeContext";
 import { Haptics } from "../helper";
 import "../global.css";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
+import Constants from "expo-constants";
+// Set notification handler to show banner and list
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+  }),
+});
+// Register for push notification permissions
+async function registerForPushNotificationsAsync() {
+  let token;
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('news', {
+      name: 'News',
+      importance: Notifications.AndroidImportance.MAX,
+      vibrationPattern: [0, 250, 250, 250],
+      lightColor: '#FF231F7C',
+    });
+  }
+  if (Device.isDevice) {
+    const { status: existingStatus } = await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
+    if (existingStatus !== 'granted') {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
+    if (finalStatus !== 'granted') {
+      alert('Failed to get push token for push notification!');
+      return;
+    }
+    try {
+      const projectId =
+        Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
+      if (!projectId) {
+        throw new Error('Project ID not found');
+      }
+      token = (
+        await Notifications.getExpoPushTokenAsync({ projectId })
+      ).data;
+      // You can send this token to your backend if needed
+    } catch (e) {
+      token = `${e}`;
+    }
+  } else {
+    alert('Must use physical device for Push Notifications');
+  }
+  return token;
+}
 
 const API_URL = "https://api.spaceflightnewsapi.net/v4/articles";
 const TOPICS = ["all", "NASA", "Exoplanets", "Planets", "Asteroids", "Moons", "SpaceX", "Black Holes", "Galaxies", "Comets"];
@@ -49,6 +101,7 @@ export default function NewsScreen() {
     const [selectedTopic, setSelectedTopic] = useState("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [debouncedQuery, setDebouncedQuery] = useState("");
+    const prevNewsTitlesRef = useRef([]);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -61,6 +114,11 @@ export default function NewsScreen() {
         fetchNewsData(true, selectedTopic, debouncedQuery);
     }, [selectedTopic, debouncedQuery]);
 
+    // Register for notifications on mount
+    useEffect(() => {
+        registerForPushNotificationsAsync();
+    }, []);
+
     async function fetchNewsData(refresh = true, topic = selectedTopic, query = debouncedQuery) {
         const data = await callNewsAPI(refresh ? 0 : newsDataOffset, topic, query);
         if (!refresh && newsData.length > 0) {
@@ -70,6 +128,27 @@ export default function NewsScreen() {
             setNewsData(data);
             setNewsDataOffset(data.length);
         }
+
+        // Notification logic: compare previous titles to new data
+        const prevTitles = prevNewsTitlesRef.current;
+        const newTitles = data.map(article => article.title);
+        // Find new articles by title
+        const newArticles = data.filter(article => !prevTitles.includes(article.title));
+        if (newArticles.length > 0 && prevTitles.length > 0) {
+            // Only notify if not initial load
+            for (const article of newArticles) {
+                await Notifications.scheduleNotificationAsync({
+                    content: {
+                        title: "New Space News Article!",
+                        body: article.title,
+                        data: { url: article.url },
+                        sound: Platform.OS === 'android' ? undefined : undefined,
+                    },
+                    trigger: null,
+                });
+            }
+        }
+        prevNewsTitlesRef.current = newTitles;
     }
 
     const backgroundColor = isDarkMode ? "#000" : "#f3f4f6";
