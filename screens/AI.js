@@ -152,6 +152,7 @@ export default function AI() {
                     color: isDarkMode ? "#fff" : "#000",
                     borderWidth: 1,
                     borderColor: isDarkMode ? "#555" : "#ccc",
+                    minHeight: 50,
                 }}
                 renderInputToolbar={(props) => (
                     <InputToolbar

@@ -14,6 +14,12 @@ export default function LaunchesScreen() {
     const { isDarkMode } = useTheme();
     const [launches, setLaunches] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
+    // Add global timer state
+    const [now, setNow] = React.useState(new Date());
+    React.useEffect(() => {
+        const interval = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(interval);
+    }, []);
 
     useEffect(() => {
         console.log("Fetching launches");
@@ -141,6 +147,7 @@ export default function LaunchesScreen() {
                 <FlashList
                     data={launches.results}
                     keyExtractor={(item) => item.id.toString()}
+                    disableRecycling={true}
                     renderItem={({ item }) => (
                         <View
                             className={`flex-row m-4 max-h-[30vh] border rounded-2xl overflow-hidden ${
@@ -170,6 +177,7 @@ export default function LaunchesScreen() {
                                 </Text>
                                 <Countdown
                                     targetDate={new Date(item.window_start)}
+                                    now={now}
                                 />
                             </View>
                             <View className="relative w-[41%]">

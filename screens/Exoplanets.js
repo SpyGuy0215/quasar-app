@@ -228,6 +228,24 @@ export default function SpaceWikiScreen() {
   if (!selectedItem) {
     return (
       <ScrollView style={{ flex: 1, backgroundColor, padding: 16 }} keyboardShouldPersistTaps="handled">
+        <View style={{ alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+          <View style={{
+            borderWidth: 2,
+            borderColor: '#2196f3',
+            borderRadius: 999,
+            paddingHorizontal: 16,
+            paddingVertical: 2,
+            marginBottom: 8,
+            backgroundColor: 'transparent',
+          }}>
+            <Text style={{
+              color: '#2196f3',
+              fontWeight: 'bold',
+              fontSize: 16,
+              letterSpacing: 1,
+            }}>Beta</Text>
+          </View>
+        </View>
         <View style={{ alignItems: "center", marginBottom: 24 }}>
           <Text style={{ fontSize: 32, fontWeight: "bold", color: textColor, marginBottom: 12, textAlign: "center" }}>
             Space Wikipedia

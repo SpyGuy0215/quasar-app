@@ -26,6 +26,7 @@ export default function SafeImage({
                 onLoadEnd={onLoadEnd}
                 onLoad={onLoad}
                 onProgress={onProgress}
+                recyclingKey={backupURL} // Helps with reloading images when URL changes
                 cachePolicy={"memory-disk"}
                 onError={() => console.error("[SafeImage] Error loading image")}
                 className={className}
@@ -42,6 +43,7 @@ export default function SafeImage({
             onLoadStart={onLoadStart}
             onLoadEnd={onLoadEnd}
             onProgress={onProgress}
+            recyclingKey={defaultURL} // Helps with reloading images when URL changes
             className={className}
             onError={(e) => {
                 console.error("[SafeImage] Error loading image, attempting backup:", e.nativeEvent.error);

@@ -22,6 +22,7 @@ const Drawer = createDrawerNavigator();
 function AppContent() {
     const { isDarkMode, toggleTheme, userPreference } = useTheme();
     const [aiTabEnabled, setAiTabEnabled] = useState(true);
+    const [homeScreen, setHomeScreen] = useState("News");
     const [loadingTabs, setLoadingTabs] = useState(true);
 
     // Callback to update tab state instantly
@@ -33,6 +34,11 @@ function AppContent() {
         AsyncStorage.getItem('quasarAiTabEnabled').then(val => {
             setAiTabEnabled(val === null || val === 'true');
             setLoadingTabs(false);
+        });
+
+        AsyncStorage.getItem('HomeScreen').then(val => {
+            if (val !== null) setHomeScreen(val);
+            else setHomeScreen("News");
         });
     }, []);
 
@@ -82,7 +88,7 @@ function AppContent() {
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: isDarkMode ? "#000" : "#fff" }} className={isDarkMode ? "dark" : ""}>
             <StatusBar style={isDarkMode ? "light" : "dark"}/>
             <NavigationContainer>
-                <Drawer.Navigator initialRouteName="News" screenOptions={drawerStyles}>
+                <Drawer.Navigator initialRouteName={homeScreen} screenOptions={drawerStyles}>
                     <Drawer.Screen
                         name="News"
                         component={NewsScreen}
@@ -126,7 +132,7 @@ function AppContent() {
                         }}
                     />
                     <Drawer.Screen
-                        name="Exoplanets"
+                        name="Space Wiki"
                         component={ExoplanetsScreen}
                         options={{
                             drawerIcon: ({ color, size }) => (
