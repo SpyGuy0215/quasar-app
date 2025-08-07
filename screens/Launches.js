@@ -147,8 +147,6 @@ export default function LaunchesScreen() {
                                 isDarkMode ? "border-[#333]" : "border-[#ccc]"
                             }`}
                         >
-                            {console.log("[Launches.js] Rendering item:", item.name)}
-                            {console.log("[Launches.js] Item image details:", item.image)}
                             <View
                                 className={`flex flex-col w-[60%] pr-4 text-center justify-between p-4 ${
                                     isDarkMode ? "bg-[#1a1a1a]" : "bg-white"

@@ -4,7 +4,13 @@ import SafeImage from "./SafeImage";
 import { truncateText } from "../helper";
 import { useTheme } from "../ThemeContext";
 
-export default function NewsCard({ title, description, imageUrl, publishedAt }) {
+export default function NewsCard({
+    title,
+    description,
+    imageUrl,
+    publishedAt,
+    publisher,
+}) {
     const { isDarkMode } = useTheme();
     description = truncateText(description, 130);
 
@@ -46,7 +52,10 @@ export default function NewsCard({ title, description, imageUrl, publishedAt }) 
     return (
         <View style={cardStyles}>
             <Text style={titleStyle}>{title}</Text>
-            <Text style={dateStyle}>{publishedAt}</Text>
+            <View className="flex flex-row w-full justify-between">
+                <Text style={dateStyle}>{publisher}</Text>
+                <Text style={dateStyle}>{publishedAt}</Text>
+            </View>
             <Text style={descriptionStyle}>{description}</Text>
             {imageUrl && (
                 <SafeImage

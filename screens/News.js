@@ -79,6 +79,7 @@ async function callNewsAPI(offset = 0, topic = "", query = "") {
             image_url: article.image_url || "https://via.placeholder.com/150",
             url: article.url,
             published_at: article.published_at,
+            news_site: article.news_site || "Unknown",
         }));
     } catch (error) {
         console.error("Error fetching news:", error);
@@ -184,7 +185,7 @@ export default function NewsScreen() {
                     style={{ backgroundColor, flex: 1 }}
                     contentContainerStyle={{ paddingBottom: 24 }}
                     data={newsData}
-                    keyExtractor={(item, index) => index.toString()}
+                    keyExtractor={(item) => item.url}
                     renderItem={({ item }) => (
                         <Pressable onPress={() => {
                             Haptics.light();
@@ -196,6 +197,7 @@ export default function NewsScreen() {
                                 imageUrl={item.image_url}
                                 url={item.url}
                                 publishedAt={new Date(item.published_at).toLocaleDateString()}
+                                publisher={item.news_site}
                             />
                         </Pressable>
                     )}
