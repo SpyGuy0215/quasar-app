@@ -1,6 +1,7 @@
 // AI.js
-import React, { useCallback, useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useCallback, useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, Modal, TextInput, FlatList } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import "../global.css";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -8,8 +9,9 @@ import Markdown from "react-native-markdown-display";
 import { useTheme } from "../ThemeContext"; // Import useTheme
 
 export default function AI() {
-    const { isDarkMode } = useTheme(); // Get dark mode value from context
+    const { isDarkMode } = useTheme();
 
+    // Default chat template
     const defaultBotMessage = {
         _id: 1,
         text: "Hello! How may I answer your questions about space?",
@@ -17,50 +19,140 @@ export default function AI() {
         user: {
             _id: 2,
             name: "Quasar AI",
-            avatar: require("../assets/quasar-ai-pfp.png"), // Ensure the path is correct
+            avatar: require("../assets/quasar-ai-pfp.png"),
         },
     };
-
     const defaultSystemMessage = {
         role: "system",
         content:
             "You are a helpful assistant that answers questions about space. You are part of a mobile app called Quasar. You are friendly, concise, and informative. You just said 'how may I answer your questions about space?' Generally, only respond to the last statement or question from the user. Don't use previous context unless you need to, because the way the data is formatted for you, you oftentimes don't see that you have already responded. No emojis, no emojis, and most importantly, no emojis. Be serious",
     };
 
-    const [messages, setMessages] = useState([defaultBotMessage]);
-    const [formattedMsgs, setFormattedMsgs] = useState([defaultSystemMessage]);
+    // Chat management state
+    const [chats, setChats] = useState([
+        {
+            id: 1,
+            name: "Chat 1",
+            messages: [defaultBotMessage],
+            formattedMsgs: [defaultSystemMessage],
+        },
+    ]);
+    const [currentChatId, setCurrentChatId] = useState(1);
 
+    // Load chats and currentChatId from AsyncStorage on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const savedChats = await AsyncStorage.getItem('quasar_chats');
+                const savedChatId = await AsyncStorage.getItem('quasar_currentChatId');
+                if (savedChats) {
+                    setChats(JSON.parse(savedChats));
+                }
+                if (savedChatId) {
+                    setCurrentChatId(Number(savedChatId));
+                }
+            } catch (e) {
+                // ignore
+            }
+        })();
+    }, []);
+
+    // Save chats and currentChatId to AsyncStorage whenever they change
+    useEffect(() => {
+        AsyncStorage.setItem('quasar_chats', JSON.stringify(chats));
+    }, [chats]);
+    useEffect(() => {
+        AsyncStorage.setItem('quasar_currentChatId', String(currentChatId));
+    }, [currentChatId]);
+    const [dropdownVisible, setDropdownVisible] = useState(false);
+    const [renameModalVisible, setRenameModalVisible] = useState(false);
+    const [newChatModalVisible, setNewChatModalVisible] = useState(false);
+    const [chatNameInput, setChatNameInput] = useState("");
+    const [chatToRename, setChatToRename] = useState(null);
+
+    // Get current chat object
+    const currentChat = chats.find((c) => c.id === currentChatId) || chats[0];
+    const messages = currentChat.messages;
+    const formattedMsgs = currentChat.formattedMsgs;
+
+    // Reset current chat
     const resetChat = () => {
-        setMessages([defaultBotMessage]);
-        setFormattedMsgs([defaultSystemMessage]);
+        setChats((prev) =>
+            prev.map((c) =>
+                c.id === currentChatId
+                    ? { ...c, messages: [defaultBotMessage], formattedMsgs: [defaultSystemMessage] }
+                    : c
+            )
+        );
+    };
+
+    // Add new chat
+    const addChat = (name) => {
+        const newId = Math.max(...chats.map((c) => c.id)) + 1;
+        const newChat = {
+            id: newId,
+            name: name || `Chat ${newId}`,
+            messages: [defaultBotMessage],
+            formattedMsgs: [defaultSystemMessage],
+        };
+        setChats((prev) => [...prev, newChat]);
+        setCurrentChatId(newId);
+    };
+
+    // Rename chat
+    const renameChat = (id, newName) => {
+        setChats((prev) => prev.map((c) => (c.id === id ? { ...c, name: newName } : c)));
+    };
+
+    // Delete chat
+    const deleteChat = (id) => {
+        let filtered = chats.filter((c) => c.id !== id);
+        if (filtered.length === 0) {
+            // Always keep at least one chat
+            filtered = [
+                {
+                    id: 1,
+                    name: "Chat 1",
+                    messages: [defaultBotMessage],
+                    formattedMsgs: [defaultSystemMessage],
+                },
+            ];
+        }
+        setChats(filtered);
+        setCurrentChatId(filtered[0].id);
     };
 
     const onSend = useCallback(
         (msg = []) => {
-            setMessages((previousMessages) =>
-                GiftedChat.append(previousMessages, msg)
+            setChats((prev) =>
+                prev.map((c) =>
+                    c.id === currentChatId
+                        ? {
+                              ...c,
+                              messages: GiftedChat.append(c.messages, msg),
+                              formattedMsgs: GiftedChat.append(
+                                  c.formattedMsgs,
+                                  [formatData(msg)]
+                              ),
+                          }
+                        : c
+                )
             );
             const formattedMsg = [formatData(msg)];
-            setFormattedMsgs((previousMessages) =>
-                GiftedChat.append(previousMessages, formattedMsg)
-            );
             const allMessages = [...formattedMsgs, ...formattedMsg];
             fetchAIResponse(allMessages);
         },
-        [formattedMsgs]
+        [formattedMsgs, currentChatId]
     );
 
     function formatData(msg) {
-        const formattedMsg = {
+        return {
             role: "user",
             content: msg[0].text,
         };
-        setFormattedMsgs((prevMsgs) => [...prevMsgs, formattedMsg]);
-        return formattedMsg;
     }
 
     async function fetchAIResponse(msgs) {
-        console.log("Fetching AI response with messages:", msgs);
         try {
             const response = await fetch(
                 "https://ai.hackclub.com/chat/completions",
@@ -78,7 +170,6 @@ export default function AI() {
                 .replace(/<think>[\s\S]*?<\/think>/gi, "")
                 .trim();
 
-            console.log("AI response:", messageText);
             let botMsg = {
                 _id: Math.random().toString(36).substring(7),
                 text: messageText || "I don't know how to respond to that.",
@@ -86,19 +177,27 @@ export default function AI() {
                 user: {
                     _id: 2,
                     name: "Quasar AI",
-                    avatar: require("../assets/quasar-ai-pfp.png"), // Ensure the path is correct
+                    avatar: require("../assets/quasar-ai-pfp.png"),
                 },
             };
-            setMessages((previousMessages) =>
-                GiftedChat.append(previousMessages, botMsg)
-            );
-            setFormattedMsgs((previousMessages) =>
-                GiftedChat.append(previousMessages, [
-                    {
-                        role: "system",
-                        content: data.choices[0].message.content,
-                    },
-                ])
+            setChats((prev) =>
+                prev.map((c) =>
+                    c.id === currentChatId
+                        ? {
+                              ...c,
+                              messages: GiftedChat.append(c.messages, botMsg),
+                              formattedMsgs: GiftedChat.append(
+                                  c.formattedMsgs,
+                                  [
+                                      {
+                                          role: "system",
+                                          content: data.choices[0].message.content,
+                                      },
+                                  ]
+                              ),
+                          }
+                        : c
+                )
             );
         } catch (error) {
             console.error("Error fetching or setting AI response:", error);
@@ -114,24 +213,179 @@ export default function AI() {
                 backgroundColor: isDarkMode ? "#000" : "#fff",
             }}
         >
-            <TouchableOpacity
-                onPress={resetChat}
-                style={{
-                    position: "absolute",
-                    top: 20,
-                    right: 20,
-                    padding: 10,
-                    borderRadius: 50,
-                    zIndex: 20,
-                    backgroundColor: isDarkMode ? "#fff" : "#000",
-                }}
+            {/* Dropdown menu for chat management */}
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 20, marginBottom: 10 }}>
+                <TouchableOpacity
+                    onPress={() => setDropdownVisible(true)}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: isDarkMode ? "#222" : "#eee",
+                        borderRadius: 20,
+                        paddingHorizontal: 16,
+                        paddingVertical: 8,
+                        marginRight: 10,
+                    }}
+                >
+                    <Text style={{ color: isDarkMode ? "#fff" : "#000", fontWeight: "bold", fontSize: 16, marginRight: 8 }}>
+                        {currentChat.name}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color={isDarkMode ? "#fff" : "#000"} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    onPress={resetChat}
+                    style={{
+                        padding: 10,
+                        borderRadius: 50,
+                        backgroundColor: isDarkMode ? "#fff" : "#000",
+                    }}
+                >
+                    <Ionicons
+                        name="refresh"
+                        size={24}
+                        color={isDarkMode ? "#000" : "#fff"}
+                    />
+                </TouchableOpacity>
+            </View>
+
+            {/* Dropdown Modal */}
+            <Modal
+                visible={dropdownVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setDropdownVisible(false)}
             >
-                <Ionicons
-                    name="refresh"
-                    size={24}
-                    color={isDarkMode ? "#000" : "#fff"}
-                />
-            </TouchableOpacity>
+                <TouchableOpacity
+                    style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)" }}
+                    activeOpacity={1}
+                    onPress={() => setDropdownVisible(false)}
+                >
+                    <View style={{ position: "absolute", top: 60, left: 20, right: 20, backgroundColor: isDarkMode ? "#222" : "#fff", borderRadius: 12, padding: 12, elevation: 5 }}>
+                        <FlatList
+                            data={chats}
+                            keyExtractor={(item) => item.id.toString()}
+                            renderItem={({ item }) => (
+                                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                                    <TouchableOpacity
+                                        style={{ flex: 1, paddingVertical: 8 }}
+                                        onPress={() => {
+                                            setCurrentChatId(item.id);
+                                            setDropdownVisible(false);
+                                        }}
+                                    >
+                                        <Text style={{ color: isDarkMode ? "#fff" : "#000", fontWeight: item.id === currentChatId ? "bold" : "normal", fontSize: 16 }}>{item.name}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            setChatToRename(item);
+                                            setChatNameInput(item.name);
+                                            setRenameModalVisible(true);
+                                            setDropdownVisible(false);
+                                        }}
+                                        style={{ marginHorizontal: 6 }}
+                                    >
+                                        <Ionicons name="pencil" size={18} color={isDarkMode ? "#fff" : "#000"} />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        onPress={() => {
+                                            deleteChat(item.id);
+                                            setDropdownVisible(false);
+                                        }}
+                                        style={{ marginHorizontal: 6 }}
+                                        disabled={chats.length === 1}
+                                    >
+                                        <Ionicons name="trash" size={18} color={chats.length === 1 ? (isDarkMode ? "#555" : "#ccc") : (isDarkMode ? "#fff" : "#000")} />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        />
+                        <TouchableOpacity
+                            style={{ marginTop: 10, flexDirection: "row", alignItems: "center" }}
+                            onPress={() => {
+                                setNewChatModalVisible(true);
+                                setDropdownVisible(false);
+                            }}
+                        >
+                            <Ionicons name="add-circle" size={20} color="#2196f3" style={{ marginRight: 6 }} />
+                            <Text style={{ color: "#2196f3", fontWeight: "bold", fontSize: 16 }}>New Chat</Text>
+                        </TouchableOpacity>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
+
+            {/* Rename Chat Modal */}
+            <Modal
+                visible={renameModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setRenameModalVisible(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ backgroundColor: isDarkMode ? "#222" : "#fff", borderRadius: 12, padding: 20, width: 300 }}>
+                        <Text style={{ color: isDarkMode ? "#fff" : "#000", fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>Rename Chat</Text>
+                        <TextInput
+                            value={chatNameInput}
+                            onChangeText={setChatNameInput}
+                            style={{ backgroundColor: isDarkMode ? "#333" : "#eee", color: isDarkMode ? "#fff" : "#000", borderRadius: 8, padding: 10, fontSize: 16, marginBottom: 16 }}
+                            autoFocus
+                        />
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+                            <TouchableOpacity onPress={() => setRenameModalVisible(false)} style={{ marginRight: 16 }}>
+                                <Text style={{ color: "#888", fontSize: 16 }}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    if (chatToRename && chatNameInput.trim()) {
+                                        renameChat(chatToRename.id, chatNameInput.trim());
+                                    }
+                                    setRenameModalVisible(false);
+                                }}
+                            >
+                                <Text style={{ color: "#2196f3", fontWeight: "bold", fontSize: 16 }}>Save</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* New Chat Modal */}
+            <Modal
+                visible={newChatModalVisible}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setNewChatModalVisible(false)}
+            >
+                <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", alignItems: "center" }}>
+                    <View style={{ backgroundColor: isDarkMode ? "#222" : "#fff", borderRadius: 12, padding: 20, width: 300 }}>
+                        <Text style={{ color: isDarkMode ? "#fff" : "#000", fontWeight: "bold", fontSize: 18, marginBottom: 10 }}>New Chat</Text>
+                        <TextInput
+                            value={chatNameInput}
+                            onChangeText={setChatNameInput}
+                            style={{ backgroundColor: isDarkMode ? "#333" : "#eee", color: isDarkMode ? "#fff" : "#000", borderRadius: 8, padding: 10, fontSize: 16, marginBottom: 16 }}
+                            placeholder="Chat name"
+                            autoFocus
+                        />
+                        <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+                            <TouchableOpacity onPress={() => setNewChatModalVisible(false)} style={{ marginRight: 16 }}>
+                                <Text style={{ color: "#888", fontSize: 16 }}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    if (chatNameInput.trim()) {
+                                        addChat(chatNameInput.trim());
+                                        setChatNameInput("");
+                                    }
+                                    setNewChatModalVisible(false);
+                                }}
+                            >
+                                <Text style={{ color: "#2196f3", fontWeight: "bold", fontSize: 16 }}>Create</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Chat UI */}
             <GiftedChat
                 messages={messages}
                 key={isDarkMode ? "dark" : "light"}
