@@ -257,7 +257,6 @@ export default function NewsScreen() {
                     />
                 </TouchableOpacity>
             </View>
-            {isFilterModalOpen && (
                 <Modal
                     animationType="slide"
                     transparent={true}
@@ -286,7 +285,6 @@ export default function NewsScreen() {
                         />
                     </View>
                 </Modal>
-            )}
             {newsData.length > 0 ? (
                 <FlashList
                     style={{ backgroundColor, flex: 1 }}

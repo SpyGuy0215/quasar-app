@@ -129,6 +129,7 @@ export default function LaunchesScreen() {
             Alert.alert("Event added to calendar");
         } catch (error) {
             console.error("Error adding event to calendar:", error);
+            Alert.alert("Error Adding Event To Calendar", error.message || "An unknown error occurred.");
         }
     }
 

@@ -14,6 +14,7 @@ import LaunchesScreen from "./screens/Launches";
 import SettingsScreen from "./screens/Settings";
 import "./global.css";
 import { ThemeProvider, useTheme } from "./ThemeContext";
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import {Haptics} from "./helper";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -87,8 +88,9 @@ function AppContent() {
     return (
         <GestureHandlerRootView style={{ flex: 1, backgroundColor: isDarkMode ? "#000" : "#fff" }} className={isDarkMode ? "dark" : ""}>
             <StatusBar style={isDarkMode ? "light" : "dark"}/>
-            <NavigationContainer>
-                <Drawer.Navigator initialRouteName={homeScreen} screenOptions={drawerStyles}>
+            <BottomSheetModalProvider>
+                <NavigationContainer>
+                    <Drawer.Navigator initialRouteName={homeScreen} screenOptions={drawerStyles}>
                     <Drawer.Screen
                         name="News"
                         component={NewsScreen}
@@ -161,23 +163,24 @@ function AppContent() {
                             }}
                         />
                     )}
-                    <Drawer.Screen
-                        name="Settings"
-                        // Pass updateAiTabEnabled as a prop to SettingsScreen
-                        children={props => <SettingsScreen {...props} updateAiTabEnabled={updateAiTabEnabled} />}
-                        options={{
-                            drawerIcon: ({ color, size }) => (
-                                <Ionicons name="settings-outline" size={size} color={color} />
-                            ),
-                        }}
-                        listeners={{
-                            focus: () => {
-                                Haptics.medium();
-                            }
-                        }}
-                    />
-                </Drawer.Navigator>
-            </NavigationContainer>
+                        <Drawer.Screen
+                            name="Settings"
+                            // Pass updateAiTabEnabled as a prop to SettingsScreen
+                            children={props => <SettingsScreen {...props} updateAiTabEnabled={updateAiTabEnabled} />}
+                            options={{
+                                drawerIcon: ({ color, size }) => (
+                                    <Ionicons name="settings-outline" size={size} color={color} />
+                                ),
+                            }}
+                            listeners={{
+                                focus: () => {
+                                    Haptics.medium();
+                                }
+                            }}
+                        />
+                    </Drawer.Navigator>
+                </NavigationContainer>
+            </BottomSheetModalProvider>
         </GestureHandlerRootView>
     );
 }
