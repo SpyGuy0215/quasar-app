@@ -39,12 +39,15 @@ export const Haptics = {
 const API_KEY = "B1yWxg9mEnZ6PIpWwDiJ8EWUSAkyj4V6re9N3Y6l";
 
 export async function getAPOD() {
+    console.log("[Helper] Fetching APOD...")
     try {
         const response = await fetch(
             `https://api.nasa.gov/planetary/apod?api_key=${API_KEY}`
         );
         if (!response.ok) throw new Error("Network response was not ok");
-        return await response.json();
+        const data = await response.json();
+        console.log("[Helper] Fetched APOD:", data);
+        return data;
     } catch (error) {
         console.error("Error fetching APOD:", error);
         return null;
