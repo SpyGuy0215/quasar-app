@@ -15,27 +15,53 @@ export default function SafeImage({
     onProgress,
     className = "",
 }) {
+    // Clean and decode the URL to handle any encoding issues
+    const cleanURL = (url) => {
+        if (!url) return url;
+        
+        // Decode URL-encoded characters
+        let cleanedUrl = decodeURIComponent(url);
+        
+        // Remove any surrounding brackets that might have been encoded
+        cleanedUrl = cleanedUrl.replace(/^\[/, '').replace(/\]$/, '');
+        
+        // Handle markdown link format [text](url) - extract just the URL
+        const markdownLinkMatch = cleanedUrl.match(/\[.*?\]\((.*?)\)/);
+        if (markdownLinkMatch) {
+            cleanedUrl = markdownLinkMatch[1];
+        }
+        
+        return cleanedUrl;
+    };
+    
+    const cleanedDefaultURL = cleanURL(defaultURL);
+    const cleanedBackupURL = cleanURL(backupURL);
+    
+    console.log("[SafeImage] Original URL:", defaultURL);
+    console.log("[SafeImage] Cleaned URL:", cleanedDefaultURL);
+    
     const [error, setError] = useState(false);
-    if (error || !defaultURL) {
+    if (error || !cleanedDefaultURL) {
+        console.log("[SafeImage] Using backup URL:", cleanedBackupURL);
         return (
             <Image
-                source={{ uri: backupURL }}
+                source={{ uri: cleanedBackupURL }}
                 style={style}
                 contentFit={resizeMode}
                 onLoadStart={onLoadStart}
                 onLoadEnd={onLoadEnd}
                 onLoad={onLoad}
                 onProgress={onProgress}
-                recyclingKey={backupURL} // Helps with reloading images when URL changes
+                recyclingKey={cleanedBackupURL} // Helps with reloading images when URL changes
                 cachePolicy={"memory-disk"}
-                onError={() => console.error("[SafeImage] Error loading image")}
+                onError={() => console.error("[SafeImage] Error loading backup image")}
                 className={className}
             />
         );
     }
     return (
         <Image
-            source={{ uri: defaultURL }}
+            source={{ uri: cleanedDefaultURL }}
             style={style}
             contentFit={resizeMode}
             cachePolicy={"memory-disk"}
@@ -43,10 +69,10 @@ export default function SafeImage({
             onLoadStart={onLoadStart}
             onLoadEnd={onLoadEnd}
             onProgress={onProgress}
-            recyclingKey={defaultURL} // Helps with reloading images when URL changes
+            recyclingKey={cleanedDefaultURL} // Helps with reloading images when URL changes
             className={className}
             onError={(e) => {
-                console.error("[SafeImage] Error loading image, attempting backup:", e.nativeEvent.error);
+                console.error("[SafeImage] Error loading image, attempting backup:", e.nativeEvent?.error || e);
                 setError(true);
             }}
         />
