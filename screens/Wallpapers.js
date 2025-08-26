@@ -187,7 +187,7 @@ export default function WallpapersScreen() {
                             });
                             Haptics.soft();
                         }}
-                        style={{ flex: 1 / 2, margin: 4 }}
+                        style={{ flex: 1, margin: 6 }}
                     >
                         {loadingImages[
                             item.links && item.links[0]
@@ -200,15 +200,15 @@ export default function WallpapersScreen() {
                                 style={{
                                     position: "absolute",
                                     alignSelf: "center",
-                                    top: 100,
+                                    top: 110,
                                 }}
                             />
                         )}
                         <SafeImage
                             style={{
                                 width: "100%",
-                                height: 230,
-                                borderRadius: 20,
+                                height: 220,
+                                borderRadius: 15,
                             }}
                             defaultURL={item.links[1]? item.links[1].href : null}
                             backupURL={item.links[0]? item.links[0].href : ""}
@@ -237,7 +237,7 @@ export default function WallpapersScreen() {
                     </TouchableOpacity>
                 )}
                 numColumns={2}
-                contentContainerStyle={{ paddingHorizontal: 8, paddingTop: 8 }}
+                contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 12, paddingBottom: 20 }}
             />
         </View>
     );

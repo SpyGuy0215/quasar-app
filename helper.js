@@ -47,6 +47,12 @@ export async function getAPOD() {
         if (!response.ok) throw new Error("Network response was not ok");
         const data = await response.json();
         console.log("[Helper] Fetched APOD:", data);
+        
+        // Log media type and URL availability for debugging
+        console.log("[Helper] APOD media type:", data.media_type);
+        console.log("[Helper] APOD hdurl:", data.hdurl);
+        console.log("[Helper] APOD url:", data.url);
+        
         return data;
     } catch (error) {
         console.error("Error fetching APOD:", error);
