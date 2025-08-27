@@ -277,6 +277,15 @@ export default function AI() {
                                 ? parsed.searchNASAIVL
                                 : prev.searchNASAIVL,
                     }));
+                } else {
+                    // First-time user: save the default enabled state
+                    const defaultSettings = {
+                        searchWikipedia: true,
+                        recentNews: true,
+                        searchNASAIVL: true,
+                    };
+                    await AsyncStorage.setItem("toolSettings", JSON.stringify(defaultSettings));
+                    console.log("[AI] First-time user: tools enabled by default");
                 }
             } catch (e) {
                 console.warn("[AI] Failed to load tool settings", e);
