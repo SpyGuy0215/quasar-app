@@ -177,9 +177,9 @@ export default function AI() {
     const [isModelReady, setIsModelReady] = useState(false);
     const [isToolsModalOpen, setIsToolsModalOpen] = useState(false);
     const [toolSettings, setToolSettings] = useState({
-        searchWikipedia: false,
-        recentNews: false,
-        searchNASAIVL: false,
+        searchWikipedia: true,
+        recentNews: true,
+        searchNASAIVL: true,
     });
     // Tool usage indicator state
     const [isUsingTool, setIsUsingTool] = useState(false);
