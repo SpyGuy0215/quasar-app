@@ -37,9 +37,6 @@ export default function SafeImage({
     const cleanedDefaultURL = cleanURL(defaultURL);
     const cleanedBackupURL = cleanURL(backupURL);
     
-    console.log("[SafeImage] Original URL:", defaultURL);
-    console.log("[SafeImage] Cleaned URL:", cleanedDefaultURL);
-    
     const [error, setError] = useState(false);
     if (error || !cleanedDefaultURL) {
         console.log("[SafeImage] Using backup URL:", cleanedBackupURL);

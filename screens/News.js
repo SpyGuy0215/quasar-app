@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
     View,
     Text,
@@ -7,8 +7,8 @@ import {
     StyleSheet,
     Platform,
     TouchableOpacity,
-    Modal,
 } from "react-native";
+import { BottomSheetModal, BottomSheetView } from "@gorhom/bottom-sheet";
 import { FlashList } from "@shopify/flash-list";
 import NewsCard from "../components/NewsCard";
 import { Ionicons } from "@expo/vector-icons";
@@ -123,6 +123,10 @@ export default function NewsScreen() {
     const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
     const [debouncedQuery, setDebouncedQuery] = useState("");
     const prevNewsTitlesRef = useRef([]);
+    
+    // Bottom sheet configuration
+    const bottomSheetRef = useRef(null);
+    const snapPoints = useMemo(() => ["50%", "60%"], []);
 
     useEffect(() => {
         const handler = setTimeout(() => {
@@ -248,6 +252,7 @@ export default function NewsScreen() {
                     onPress={() => {
                         Haptics.light();
                         setIsFilterModalOpen(true);
+                        bottomSheetRef.current?.present();
                     }}
                 >
                     <Ionicons
@@ -257,34 +262,41 @@ export default function NewsScreen() {
                     />
                 </TouchableOpacity>
             </View>
-                <Modal
-                    animationType="slide"
-                    transparent={true}
-                    visible={isFilterModalOpen}
-                    onRequestClose={() => setIsFilterModalOpen(false)}
-                >
-                    <View
-                        className={
-                            "absolute bottom-0 left-0 w-full rounded-t-3xl p-6 items-center h-[35%] shadow-lg border " +
-                            (isDarkMode
-                                ? "bg-galaxy-darkbg border-galaxy-darkborder"
-                                : "bg-galaxy-lightbg border-galaxy-lightborder")
-                        }
-                    >
-                        <View style={{ position: "absolute", top: 18, right: 18 }}>
-                            <TouchableOpacity onPress={() => setIsFilterModalOpen(false)}>
-                                <Ionicons name="close" size={28} color={isDarkMode ? "#fff" : "#000"} />
-                            </TouchableOpacity>
-                        </View>
-                        <Text style={{ color: textColor, fontSize: 20, fontWeight: "bold", marginBottom: 8 }}>Topic</Text>
-                        <Dropdown
-                            items={TOPICS}
-                            selectedItem={selectedTopic}
-                            onSelect={(item) => setSelectedTopic(item)}
-                            tailwindStyles="my-3"
-                        />
+            
+            <BottomSheetModal
+                ref={bottomSheetRef}
+                index={0}
+                snapPoints={snapPoints}
+                enablePanDownToClose
+                backgroundStyle={{
+                    backgroundColor: isDarkMode ? "#111" : "#fafafa",
+                }}
+                handleIndicatorStyle={{
+                    backgroundColor: isDarkMode ? "#444" : "#999",
+                }}
+                onDismiss={() => setIsFilterModalOpen(false)}
+            >
+                <BottomSheetView style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 24 }}>
+                    <View style={{ alignItems: "center", marginBottom: 4, justifyContent: "center" }}>
+                        <Text style={{ fontSize: 18, fontWeight: "600", color: isDarkMode ? "#fff" : "#000" }}>
+                            Topic
+                        </Text>
+                        <TouchableOpacity
+                            onPress={() => bottomSheetRef.current?.close()}
+                            style={{ position: "absolute", right: 0, padding: 4 }}
+                        >
+                            <Ionicons name="close" size={22} color={isDarkMode ? "#fff" : "#000"} />
+                        </TouchableOpacity>
                     </View>
-                </Modal>
+                    <View style={{ height: 8 }} />
+                    <Dropdown
+                        items={TOPICS}
+                        selectedItem={selectedTopic}
+                        onSelect={(item) => setSelectedTopic(item)}
+                        tailwindStyles="mt-3 mb-24"
+                    />
+                </BottomSheetView>
+            </BottomSheetModal>
             {newsData.length > 0 ? (
                 <FlashList
                     style={{ backgroundColor, flex: 1 }}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, Image, TouchableOpacity, Linking } from "react-native";
+import { View, Text, Image, TouchableOpacity, Linking, ActivityIndicator } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import {getAPOD} from "../helper";
 import { useColorScheme } from "react-native";
@@ -104,7 +104,23 @@ export default function APODScreen(){
                     }}>{data.explanation}</Text>
                 </ScrollView>
             ) : (
-                <Text className="text-lg text-center mt-10">Loading...</Text>
+                <View className="flex-1 justify-center items-center mt-20">
+                    <ActivityIndicator 
+                        size="large" 
+                        color={isDarkMode ? "#fff" : "#000"} 
+                        className="mb-4"
+                    />
+                    <Text className="text-lg text-center" style={{
+                        color: isDarkMode ? "#fff" : "#000"
+                    }}>
+                        Loading today's cosmic wonder...
+                    </Text>
+                    <Text className="text-sm text-center mt-2 opacity-75" style={{
+                        color: isDarkMode ? "#aaa" : "#555"
+                    }}>
+                        Fetching Astronomy Picture of the Day
+                    </Text>
+                </View>
             )}
         </View>
     )

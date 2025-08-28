@@ -14,12 +14,6 @@ export default function LaunchesScreen() {
     const { isDarkMode } = useTheme();
     const [launches, setLaunches] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
-    // Add global timer state
-    const [now, setNow] = React.useState(new Date());
-    React.useEffect(() => {
-        const interval = setInterval(() => setNow(new Date()), 1000);
-        return () => clearInterval(interval);
-    }, []);
 
     useEffect(() => {
         console.log("Fetching launches");
@@ -178,7 +172,6 @@ export default function LaunchesScreen() {
                                 </Text>
                                 <Countdown
                                     targetDate={new Date(item.window_start)}
-                                    now={now}
                                 />
                             </View>
                             <View className="relative w-[41%]">
